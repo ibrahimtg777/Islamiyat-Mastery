@@ -1,0 +1,289 @@
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useParams, Navigate } from 'react-router-dom';
+
+// Single-file React app (TailwindCSS assumed).
+// FEATURES:
+// - Landing page describing CAIE notes product
+// - Subject list (sample CAIE subjects)
+// - Paywall: protected notes pages requiring purchase or subscription
+// - Stripe checkout placeholder (backend required)
+// - Simulated auth and purchase state (localStorage) for demo
+// --- Backend endpoints expected (you must implement):
+// POST /api/create-checkout-session  -> returns { url }
+// GET  /api/notes/:id                 -> returns note content if user has access (or 402/403)
+// POST /api/webhook/stripe            -> handle payment success, mark purchase server-side
+// For production: implement server-side auth, real DB for users/purchases, and real Stripe integration.
+
+// ---------- Utility helpers (demo only) ----------
+const CAIE_SUBJECTS = [
+  { id: 'math', title: 'Cambridge IGCSE Mathematics', grade: 'IGCSE' },
+  { id: 'phy', title: 'Cambridge IGCSE Physics', grade: 'IGCSE' },
+  { id: 'chem', title: 'Cambridge IGCSE Chemistry', grade: 'IGCSE' },
+  { id: 'bio', title: 'Cambridge IGCSE Biology', grade: 'IGCSE' },
+  { id: 'eng', title: 'Cambridge IGCSE English', grade: 'IGCSE' },
+  { id: 'eco', title: 'Cambridge AS/A Level Economics', grade: 'AS/A' },
+  { id: 'calc', title: 'Cambridge AS/A Level Mathematics', grade: 'AS/A' },
+  { id: 'history', title: 'Cambridge IGCSE History', grade: 'IGCSE' },
+  // add more as needed
+];
+
+const saveUser = (u) => localStorage.setItem('caie_user', JSON.stringify(u));
+const loadUser = () => JSON.parse(localStorage.getItem('caie_user') || 'null');
+
+// Demo auth: simple email login (no password). In production use OAuth / secure auth.
+function useAuth() {
+  const [user, setUser] = useState(loadUser());
+  useEffect(() => { saveUser(user); }, [user]);
+  const login = (email) => setUser({ email, purchases: user?.purchases || [] });
+  const logout = () => { setUser(null); localStorage.removeItem('caie_user'); };
+  const addPurchase = (subjectId) => {
+    const next = { ...user, purchases: Array.from(new Set([...(user?.purchases || []), subjectId])) };
+    setUser(next);
+  };
+  return { user, login, logout, addPurchase };
+}
+
+// ---------- Components ----------
+function Header({ user, logout }) {
+  return (
+    <header className="bg-gradient-to-r from-sky-600 to-indigo-600 text-white p-4 flex justify-between items-center">
+      <Link to="/" className="text-xl font-bold">CAIE Notes Vault</Link>
+      <nav className="space-x-4">
+        <Link className="hover:underline" to="/subjects">Subjects</Link>
+        <Link className="hover:underline" to="/pricing">Pricing</Link>
+        {user ? (
+          <span className="ml-4">{user.email} <button onClick={logout} className="ml-3 underline">Logout</button></span>
+        ) : (
+          <Link to="/login" className="ml-4 underline">Login</Link>
+        )}
+      </nav>
+    </header>
+  );
+}
+
+function Home() {
+  return (
+    <main className="p-8">
+      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow p-8">
+        <h1 className="text-3xl font-bold mb-4">Secure CAIE notes — pay once or subscribe</h1>
+        <p className="mb-4">High-quality, neatly organized notes for all major Cambridge (CAIE) subjects. Pay-per-subject or subscribe for full access. Teachers and students can upload verified notes (admin review required).</p>
+        <div className="flex gap-4">
+          <Link to="/subjects" className="px-4 py-2 bg-indigo-600 text-white rounded">Browse subjects</Link>
+          <Link to="/pricing" className="px-4 py-2 border rounded">See pricing</Link>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+function Subjects({ user }) {
+  return (
+    <main className="p-6">
+      <h2 className="text-2xl font-semibold mb-4">Subjects</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {CAIE_SUBJECTS.map(s => (
+          <div key={s.id} className="p-4 border rounded">
+            <h3 className="font-bold">{s.title}</h3>
+            <p className="text-sm text-gray-600">Level: {s.grade}</p>
+            <div className="mt-4 flex gap-2">
+              <Link to={`/subject/${s.id}`} className="px-3 py-1 border rounded">View notes</Link>
+            </div>
+          </div>
+        ))}
+      </div>
+    </main>
+  );
+}
+
+function Pricing() {
+  return (
+    <main className="p-8">
+      <div className="max-w-3xl mx-auto bg-white p-6 rounded shadow">
+        <h2 className="text-xl font-semibold mb-3">Pricing</h2>
+        <ul className="mb-4">
+          <li>One-off subject purchase: <strong>USD 4.99</strong> (example)</li>
+          <li>Monthly subscription (all subjects): <strong>USD 9.99 / month</strong></li>
+        </ul>
+        <p className="text-sm text-gray-600">Payments are powered by Stripe. To try a demo payment flow locally, implement the backend endpoint <code>/api/create-checkout-session</code>.</p>
+      </div>
+    </main>
+  );
+}
+
+function Login({ onLogin }) {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const submit = (e) => {
+    e.preventDefault();
+    if (!email.includes('@')) return alert('Please enter a valid email (demo).');
+    onLogin(email);
+    navigate('/subjects');
+  };
+  return (
+    <main className="p-6 max-w-md mx-auto">
+      <h2 className="text-2xl font-semibold mb-4">Login (demo)</h2>
+      <form onSubmit={submit} className="space-y-3 bg-white p-4 rounded shadow">
+        <label className="block">
+          <div className="text-sm">Email</div>
+          <input value={email} onChange={e=>setEmail(e.target.value)} className="w-full border p-2 rounded" />
+        </label>
+        <button className="px-4 py-2 bg-indigo-600 text-white rounded">Login</button>
+      </form>
+    </main>
+  );
+}
+
+// Protected route component — checks if user has access to subject or redirects to pricing.
+function ProtectedNote({ user, children, subjectId }) {
+  if (!user) return <Navigate to="/login" replace />;
+  const has = user.purchases?.includes(subjectId);
+  return has ? children : <PurchasePrompt subjectId={subjectId} />;
+}
+
+function PurchasePrompt({ subjectId }) {
+  const navigate = useNavigate();
+  const startCheckout = async (e) => {
+    e.preventDefault();
+    // Call backend to create a Stripe Checkout session for this subject
+    // Backend should return { url }
+    try {
+      const res = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subjectId }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        // Redirect to Stripe Checkout
+        window.location.href = data.url;
+      } else {
+        alert('Failed to start checkout. Backend not implemented.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Checkout error (demo). Implement /api/create-checkout-session on server.');
+    }
+  };
+  return (
+    <div className="p-6 bg-white rounded shadow max-w-xl mx-auto">
+      <h3 className="text-xl font-semibold">Purchase required</h3>
+      <p className="mb-4">You need to purchase access to this subject's notes.</p>
+      <div className="flex gap-3">
+        <button onClick={startCheckout} className="px-4 py-2 bg-green-600 text-white rounded">Buy for $4.99</button>
+        <button onClick={()=>navigate('/pricing')} className="px-4 py-2 border rounded">View pricing</button>
+      </div>
+    </div>
+  );
+}
+
+function SubjectPage({ user, addPurchase }) {
+  const { id } = useParams();
+  const [note, setNote] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const subject = CAIE_SUBJECTS.find(s => s.id === id) || { title: id };
+
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      setLoading(true);
+      try {
+        // Try to fetch note content from backend. If server enforces auth/purchase,
+        // respond accordingly. Here we simulate a fetch.
+        const token = user ? btoa(user.email) : null; // demo token
+        const res = await fetch(`/api/notes/${id}`, { headers: token ? { 'Authorization': `Bearer ${token}` } : {} });
+        if (res.status === 200) {
+          const data = await res.json();
+          if (mounted) setNote(data);
+        } else if (res.status === 402) {
+          // Payment required — backend should redirect or indicate
+          setNote({ locked: true });
+        } else if (res.status === 401 || res.status === 403) {
+          setNote({ locked: true });
+        } else {
+          // Demo fallback: if user has purchase in localStorage allow, else locked
+          const hasLocal = user?.purchases?.includes(id);
+          if (hasLocal) {
+            setNote({ content: `Demo notes for ${subject.title}. Replace with real notes from your DB.` });
+          } else {
+            setNote({ locked: true });
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        const hasLocal = user?.purchases?.includes(id);
+        if (hasLocal) setNote({ content: `Demo notes for ${subject.title}. Replace with real notes from your DB.` });
+        else setNote({ locked: true });
+      } finally { if (mounted) setLoading(false); }
+    }
+    load();
+    return () => { mounted = false; };
+  }, [id, user]);
+
+  if (loading) return <div className="p-6">Loading…</div>;
+  if (note?.locked) return <ProtectedNote user={user} subjectId={id} />;
+
+  return (
+    <main className="p-6">
+      <div className="max-w-3xl mx-auto bg-white p-6 rounded shadow">
+        <h2 className="text-2xl font-bold mb-2">{subject.title}</h2>
+        <div className="prose max-w-none">
+          {/* In production: render rich HTML/MD or embedded PDFs. */}
+          <p><strong>Note preview:</strong></p>
+          <p>{note?.content || 'No notes found.'}</p>
+          <hr />
+          <p className="text-sm text-gray-600">If this is a demo, purchases are simulated locally. To enable real payments, implement the backend webhook to mark user purchases server-side.</p>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="p-4 text-center text-sm text-gray-500">
+      © {new Date().getFullYear()} CAIE Notes Vault. Built for demo purposes.
+    </footer>
+  );
+}
+
+// ---------- Main App ----------
+export default function App() {
+  const auth = useAuth();
+  return (
+    <Router>
+      <div className="min-h-screen bg-slate-50 flex flex-col">
+        <Header user={auth.user} logout={auth.logout} />
+
+        <div className="flex-grow">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/subjects" element={<Subjects user={auth.user} />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/login" element={<Login onLogin={auth.login} />} />
+            <Route path="/subject/:id" element={
+              <SubjectPage user={auth.user} addPurchase={auth.addPurchase} />
+            } />
+
+            <Route path="*" element={<div className="p-6">Page not found. <Link to="/">Go home</Link></div>} />
+          </Routes>
+        </div>
+
+        <Footer />
+      </div>
+    </Router>
+  );
+}
+
+/*
+Deployment / next steps (server-side responsibilities):
+1) Build a server (Node/Express, Python/Flask, etc.) with endpoints:
+   - POST /api/create-checkout-session { subjectId } -> create Stripe Checkout session -> return url
+   - POST /api/notes/:id -> serve notes content only if session/user has purchase
+   - Webhook /api/webhook/stripe to receive checkout.session.completed and mark purchase
+2) Use a real authentication system (JWT, sessions, OAuth) and a database (users, purchases, notes).
+3) Protect note files (store on cloud storage with signed URLs) and only grant signed URLs after verification.
+4) Implement refund policy, dispute handling, and GDPR/other compliance.
+5) Add admin UI to upload/approve notes, set prices per subject, and view sales reports.
+
+Security & legal note: CAIE notes may contain copyrighted material. Ensure you have rights/permissions to distribute any past papers or official materials. Prefer creating original study notes and summaries.
+*/
