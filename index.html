@@ -3,10 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>CAIE Notes — Forest Rain UI</title>
+  <title>CAIE Notes — Forest Rain UI Demo PayFast</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* full-screen layout */
     html,body { height: 100%; margin:0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
     #bg {
       position: fixed;
@@ -38,12 +37,9 @@
     }
     .card-hover:hover { transform: translateY(-6px); box-shadow: 0 12px 30px rgba(2,6,23,0.55); }
     .note-content { white-space: pre-wrap; line-height: 1.6; color: #e6eef8; }
-    /* small screens grid */
     .grid-cols-responsive { grid-template-columns: repeat(1, minmax(0,1fr)); }
     @media(min-width: 640px) { .grid-cols-responsive { grid-template-columns: repeat(2, minmax(0,1fr)); } }
     @media(min-width: 1024px) { .grid-cols-responsive { grid-template-columns: repeat(3, minmax(0,1fr)); } }
-
-    /* Fixed button group layout */
     .btn-group {
       display: flex;
       flex-direction: column;
@@ -57,18 +53,16 @@
 </head>
 <body class="min-h-screen text-slate-100">
 
-  <!-- Background image + overlay + rain canvas -->
   <div id="bg" aria-hidden="true"></div>
   <div id="overlay" aria-hidden="true"></div>
   <canvas id="rainCanvas" aria-hidden="true"></canvas>
 
-  <!-- App container -->
   <div class="relative z-10 min-h-screen flex flex-col">
     <header class="py-6">
       <div class="max-w-6xl mx-auto px-4 flex items-center justify-between">
         <div>
-          <h1 class="text-3xl font-extrabold tracking-tight drop-shadow-md">🌲 CAIE Notes — Forest Edition</h1>
-          <p class="text-slate-300 mt-1">Original, syllabus-aligned study notes. Unlock to read. (Payments simulated — stored locally.)</p>
+          <h1 class="text-3xl font-extrabold tracking-tight drop-shadow-md">🌲 CAIE Notes — Forest Edition Demo PayFast</h1>
+          <p class="text-slate-300 mt-1">Demo: Unlock buttons open PayFast payment page URL in new tab.</p>
         </div>
         <div class="flex items-center gap-3">
           <button id="unlockAllBtn" class="px-3 py-2 rounded-md glass text-sky-200 hover:bg-white/5 transition">Unlock All</button>
@@ -80,32 +74,26 @@
     <main class="flex-1">
       <div class="max-w-6xl mx-auto px-4 pb-12">
         <section class="grid gap-6 grid-cols-responsive">
-          <!-- Feature card -->
           <div class="glass rounded-2xl p-6 flex flex-col gap-4">
-            <h2 class="text-xl font-semibold">How it works</h2>
-            <p class="text-slate-300">Click a subject card to preview. Click <strong>Unlock</strong> to simulate purchase — the subject will be unlocked for your browser only. Use <em>Download</em> to save the notes as a .txt file.</p>
+            <h2 class="text-xl font-semibold">How it works (Demo)</h2>
+            <p class="text-slate-300">Click Unlock on a subject to open a simulated PayFast payment page URL in a new tab (no actual payment).</p>
             <div class="flex gap-3">
               <button id="demoLockBtn" class="px-4 py-2 bg-indigo-600 rounded-md shadow hover:brightness-105">Demo: Lock All (Shift+L)</button>
               <button id="demoInfoBtn" class="px-4 py-2 border rounded-md">About Notes</button>
             </div>
           </div>
 
-          <!-- Subjects container -->
           <div class="glass rounded-2xl p-6 col-span-1 lg:col-span-2">
             <h3 class="text-lg font-semibold mb-4">Subjects</h3>
-            <div id="subjectsGrid" class="grid gap-4 grid-cols-responsive">
-              <!-- JS will populate cards here -->
-            </div>
+            <div id="subjectsGrid" class="grid gap-4 grid-cols-responsive"></div>
           </div>
         </section>
 
-        <!-- small footer buttons -->
         <div class="mt-8 text-slate-300 text-sm text-center">Tip: Press <strong>Shift + L</strong> to lock (clear) unlocked subjects. © <span id="year"></span></div>
       </div>
     </main>
   </div>
 
-  <!-- Modal for notes -->
   <div id="modal" class="fixed inset-0 hidden items-center justify-center z-20">
     <div class="absolute inset-0 bg-black/50" id="modalBackdrop"></div>
     <div class="relative max-w-4xl w-full mx-4">
@@ -124,19 +112,15 @@
   </div>
 
   <script>
-  // ------------------------
-  // Rain animation (canvas)
-  // ------------------------
   (function() {
     const canvas = document.getElementById('rainCanvas');
     const ctx = canvas.getContext('2d');
     let w = canvas.width = innerWidth;
     let h = canvas.height = innerHeight;
     const drops = [];
-    const DROP_COUNT = Math.floor((w * h) / 12000); // adaptive amount
+    const DROP_COUNT = Math.floor((w * h) / 12000);
 
     function rand(min, max) { return Math.random() * (max - min) + min; }
-
     function reset() {
       w = canvas.width = innerWidth;
       h = canvas.height = innerHeight;
@@ -146,26 +130,22 @@
           x: Math.random() * w,
           y: Math.random() * h,
           len: rand(10, 24),
-          velY: rand(300, 900) / 1000, // fall speed multiplier
+          velY: rand(300, 900) / 1000,
           thickness: rand(0.8, 1.8),
           sway: rand(-0.6, 0.6),
           opacity: rand(0.12, 0.28)
         });
       }
     }
-
     let last = performance.now();
     function draw(now) {
       const dt = (now - last) / 1000; last = now;
       ctx.clearRect(0,0,w,h);
-      // subtle mist near bottom
       const grad = ctx.createLinearGradient(0,0,0,h);
       grad.addColorStop(0, 'rgba(255,255,255,0)');
       grad.addColorStop(1, 'rgba(0,0,0,0.08)');
       ctx.fillStyle = grad;
       ctx.fillRect(0,0,w,h);
-
-      // draw drops
       ctx.lineCap = 'round';
       for (let d of drops) {
         d.y += d.velY * 1200 * dt;
@@ -178,19 +158,13 @@
         ctx.lineTo(d.x + d.sway * 8, d.y + d.len);
         ctx.stroke();
       }
-
-      // occasional ripple (subtle)
       requestAnimationFrame(draw);
     }
-
     window.addEventListener('resize', reset);
     reset();
     requestAnimationFrame(draw);
   })();
 
-  // ------------------------
-  // Notes data (original)
-  // ------------------------
   const NOTES = {
     "mathematics": {
       title: "Mathematics (IGCSE / AS-A Level core concepts)",
@@ -350,9 +324,6 @@ Exam tips:
     }
   };
 
-  // ------------------------
-  // UI & storage helpers
-  // ------------------------
   const STORAGE_KEY = 'caie_forest_unlocked_v1';
   function loadUnlocked() {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
@@ -364,9 +335,6 @@ Exam tips:
   function lockAll() { saveUnlocked([]); }
   function unlockAll() { saveUnlocked(Object.keys(NOTES)); }
 
-  // ------------------------
-  // Render subject cards
-  // ------------------------
   const subjectsGrid = document.getElementById('subjectsGrid');
   const modal = document.getElementById('modal');
   const modalBackdrop = document.getElementById('modalBackdrop');
@@ -416,9 +384,7 @@ Exam tips:
     });
   }
 
-  // ------------------------
   // Modal open/close & content
-  // ------------------------
   let currentKey = null;
   function openModal(key) {
     currentKey = key;
@@ -460,40 +426,47 @@ Exam tips:
     printWindow.print();
   });
 
-  // ------------------------
-  // Unlock handlers & UI update
-  // ------------------------
+  // Demo PayFast integration (opens payment URL in new tab for demo only)
+  const PAYFAST = {
+    merchant_id: '10000100', // demo merchant id
+    merchant_key: '46f0cd694581a', // demo merchant key
+    return_url: window.location.origin + '/payment-success.html',
+    cancel_url: window.location.origin + '/payment-cancel.html',
+    notify_url: window.location.origin + '/ipn-listener'
+  };
+
+  function generatePayFastUrl(item_name, amount) {
+    const params = new URLSearchParams({
+      merchant_id: PAYFAST.merchant_id,
+      merchant_key: PAYFAST.merchant_key,
+      return_url: PAYFAST.return_url,
+      cancel_url: PAYFAST.cancel_url,
+      notify_url: PAYFAST.notify_url,
+      amount: amount.toFixed(2),
+      item_name
+    });
+    return 'https://www.payfast.co.za/eng/process?' + params.toString();
+  }
+
   function handleUnlock(key) {
     if (isUnlocked(key)) {
       alert("Already unlocked!");
       return;
     }
-    if (confirm(`Unlock "${NOTES[key].title}" for $${NOTES[key].price.toFixed(2)}?`)) {
-      unlock(key);
-      alert('Unlocked! You can now open or download the notes.');
-      renderAllCards();
-    }
+    const subject = NOTES[key];
+    const payUrl = generatePayFastUrl(subject.title, subject.price);
+    // Open PayFast payment page URL in new tab (demo)
+    window.open(payUrl, '_blank');
   }
 
   document.getElementById('unlockAllBtn').addEventListener('click', () => {
-    if (confirm("Unlock ALL subjects for $29.99?")) {
-      unlockAll();
-      alert("All subjects unlocked!");
-      renderAllCards();
-    }
+    alert('Unlock All feature is disabled in demo.');
   });
 
   document.getElementById('exportAllBtn').addEventListener('click', () => {
-    if (!confirm("Download notes for ALL unlocked subjects?")) return;
-    const unlockedKeys = loadUnlocked();
-    if (unlockedKeys.length === 0) {
-      alert("No subjects unlocked yet.");
-      return;
-    }
-    unlockedKeys.forEach(k => downloadSubject(k));
+    alert('Download All feature is disabled in demo.');
   });
 
-  // Demo buttons for locking and info
   document.getElementById('demoLockBtn').addEventListener('click', () => {
     if (confirm("Lock all unlocked subjects?")) {
       lockAll();
@@ -503,7 +476,7 @@ Exam tips:
   });
 
   document.getElementById('demoInfoBtn').addEventListener('click', () => {
-    alert("This site offers CAIE study notes for key subjects. Unlock any subject to view full notes and download them for offline study.");
+    alert("This demo site shows CAIE notes. Clicking Unlock opens a simulated PayFast payment page URL in a new tab.");
   });
 
   // Keyboard shortcut: Shift + L to lock all
@@ -518,10 +491,8 @@ Exam tips:
     }
   });
 
-  // Initialize
   renderAllCards();
   document.getElementById('year').textContent = new Date().getFullYear();
-
   </script>
 </body>
 </html>
