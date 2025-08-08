@@ -3,532 +3,506 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>CAIE Notes Vault — Single File</title>
+  <title>CAIE Notes — Forest Rain UI</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* small helpers */
-    .note-content { white-space: pre-wrap; }
+    /* full-screen layout */
+    html,body { height: 100%; margin:0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+    #bg {
+      position: fixed;
+      inset: 0;
+      background-image: url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1950&q=80');
+      background-size: cover;
+      background-position: center;
+      filter: saturate(0.9) contrast(0.9);
+      z-index: -3;
+    }
+    #overlay {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(6,21,38,0.45) 0%, rgba(2,6,23,0.6) 100%);
+      z-index: -2;
+    }
+    #rainCanvas {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      mix-blend-mode: screen;
+      opacity: 0.85;
+    }
+    .glass {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(6px) saturate(1.1);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .card-hover:hover { transform: translateY(-6px); box-shadow: 0 12px 30px rgba(2,6,23,0.55); }
+    .note-content { white-space: pre-wrap; line-height: 1.6; color: #e6eef8; }
+    /* small screens grid */
+    .grid-cols-responsive { grid-template-columns: repeat(1, minmax(0,1fr)); }
+    @media(min-width: 640px) { .grid-cols-responsive { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+    @media(min-width: 1024px) { .grid-cols-responsive { grid-template-columns: repeat(3, minmax(0,1fr)); } }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
-  <header class="bg-gradient-to-r from-sky-600 to-indigo-600 text-white p-6">
-    <div class="max-w-6xl mx-auto flex items-center justify-between">
-      <h1 class="text-2xl font-bold">CAIE Notes Vault — Offline Single File</h1>
-      <div class="space-x-3">
-        <button id="unlockAllBtn" class="bg-white text-indigo-600 px-3 py-1 rounded shadow-sm">Unlock All (demo)</button>
-        <button id="exportAllBtn" class="bg-white text-indigo-600 px-3 py-1 rounded shadow-sm">Download All (TXT)</button>
+<body class="min-h-screen text-slate-100">
+
+  <!-- Background image + overlay + rain canvas -->
+  <div id="bg" aria-hidden="true"></div>
+  <div id="overlay" aria-hidden="true"></div>
+  <canvas id="rainCanvas" aria-hidden="true"></canvas>
+
+  <!-- App container -->
+  <div class="relative z-10 min-h-screen flex flex-col">
+    <header class="py-6">
+      <div class="max-w-6xl mx-auto px-4 flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-extrabold tracking-tight drop-shadow-md">🌲 CAIE Notes — Forest Edition</h1>
+          <p class="text-slate-300 mt-1">Original, syllabus-aligned study notes. Unlock to read. (Payments simulated — stored locally.)</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <button id="unlockAllBtn" class="px-3 py-2 rounded-md glass text-sky-200 hover:bg-white/5 transition">Unlock All</button>
+          <button id="exportAllBtn" class="px-3 py-2 rounded-md glass text-sky-200 hover:bg-white/5 transition">Download All</button>
+        </div>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <main class="max-w-6xl mx-auto p-6">
-    <section class="mb-6">
-      <p class="text-slate-700">This single-file app contains complete original study notes for major CAIE subjects. Click a subject to open its notes. Payment is simulated locally — clicking <strong>Buy</strong> unlocks the subject using localStorage so you can use it offline.</p>
-    </section>
+    <main class="flex-1">
+      <div class="max-w-6xl mx-auto px-4 pb-12">
+        <section class="grid gap-6 grid-cols-responsive">
+          <!-- Feature card -->
+          <div class="glass rounded-2xl p-6 flex flex-col gap-4">
+            <h2 class="text-xl font-semibold">How it works</h2>
+            <p class="text-slate-300">Click a subject card to preview. Click <strong>Unlock</strong> to simulate purchase — the subject will be unlocked for your browser only. Use <em>Download</em> to save the notes as a .txt file.</p>
+            <div class="flex gap-3">
+              <button id="demoLockBtn" class="px-4 py-2 bg-indigo-600 rounded-md shadow hover:brightness-105">Demo: Lock All (Shift+L)</button>
+              <button id="demoInfoBtn" class="px-4 py-2 border rounded-md">About Notes</button>
+            </div>
+          </div>
 
-    <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8" id="subjectsGrid">
-      <!-- JavaScript will populate cards -->
-    </section>
+          <!-- Subjects container -->
+          <div class="glass rounded-2xl p-6 col-span-1 lg:col-span-2">
+            <h3 class="text-lg font-semibold mb-4">Subjects</h3>
+            <div id="subjectsGrid" class="grid gap-4 grid-cols-responsive">
+              <!-- JS will populate cards here -->
+            </div>
+          </div>
+        </section>
 
-    <section id="noteView" class="hidden">
-      <div class="bg-white p-6 rounded shadow">
-        <div class="flex justify-between items-start">
-          <h2 id="noteTitle" class="text-2xl font-bold"></h2>
-          <div class="space-x-2">
-            <button id="downloadBtn" class="px-3 py-1 border rounded">Download .txt</button>
-            <button id="printBtn" class="px-3 py-1 border rounded">Print</button>
-            <button id="backBtn" class="px-3 py-1 border rounded">Back</button>
+        <!-- small footer buttons -->
+        <div class="mt-8 text-slate-300 text-sm text-center">Tip: Press <strong>Shift + L</strong> to lock (clear) unlocked subjects. © <span id="year"></span></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal for notes -->
+  <div id="modal" class="fixed inset-0 hidden items-center justify-center z-20">
+    <div class="absolute inset-0 bg-black/50" id="modalBackdrop"></div>
+    <div class="relative max-w-4xl w-full mx-4">
+      <div class="bg-gradient-to-r from-slate-900/80 to-slate-800/70 rounded-2xl p-6 glass shadow-2xl overflow-hidden">
+        <div class="flex items-start justify-between gap-4">
+          <h2 id="modalTitle" class="text-2xl font-bold text-sky-100"></h2>
+          <div class="flex gap-2">
+            <button id="modalDownload" class="px-3 py-2 border rounded text-sky-100">Download</button>
+            <button id="modalPrint" class="px-3 py-2 border rounded text-sky-100">Print</button>
+            <button id="modalClose" class="px-3 py-2 bg-red-600 rounded text-white">Close</button>
           </div>
         </div>
-        <div class="mt-4 note-content text-slate-800" id="noteContent" style="line-height:1.6"></div>
+        <div class="mt-4 max-h-[60vh] overflow-auto note-content" id="modalContent" style="padding-right:12px;"></div>
       </div>
-    </section>
-  </main>
-
-  <footer class="text-center p-6 text-sm text-slate-600">
-    © <span id="year"></span> CAIE Notes Vault — Original, educational notes (not official Cambridge materials).
-  </footer>
+    </div>
+  </div>
 
   <script>
-    // ---------- Notes data (original content) ----------
-    // The notes below are purposely detailed and original; each is a long string.
-    const NOTES = {
-      "mathematics": {
-        title: "Mathematics (IGCSE / AS-A Level core concepts)",
-        price: 4.99,
-        content:
+  // ------------------------
+  // Rain animation (canvas)
+  // ------------------------
+  (function() {
+    const canvas = document.getElementById('rainCanvas');
+    const ctx = canvas.getContext('2d');
+    let w = canvas.width = innerWidth;
+    let h = canvas.height = innerHeight;
+    const drops = [];
+    const DROP_COUNT = Math.floor((w * h) / 12000); // adaptive amount
+
+    function rand(min, max) { return Math.random() * (max - min) + min; }
+
+    function reset() {
+      w = canvas.width = innerWidth;
+      h = canvas.height = innerHeight;
+      drops.length = 0;
+      for (let i = 0; i < DROP_COUNT; i++) {
+        drops.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          len: rand(10, 24),
+          velY: rand(300, 900) / 1000, // fall speed multiplier
+          thickness: rand(0.8, 1.8),
+          sway: rand(-0.6, 0.6),
+          opacity: rand(0.12, 0.28)
+        });
+      }
+    }
+
+    let last = performance.now();
+    function draw(now) {
+      const dt = (now - last) / 1000; last = now;
+      ctx.clearRect(0,0,w,h);
+      // subtle mist near bottom
+      const grad = ctx.createLinearGradient(0,0,0,h);
+      grad.addColorStop(0, 'rgba(255,255,255,0)');
+      grad.addColorStop(1, 'rgba(0,0,0,0.08)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0,0,w,h);
+
+      // draw drops
+      ctx.lineCap = 'round';
+      for (let d of drops) {
+        d.y += d.velY * 1200 * dt;
+        d.x += Math.sin((d.y + now * 0.001) * 0.002) * (d.sway * 2);
+        if (d.y > h + 30) { d.y = -20; d.x = Math.random() * w; }
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(200,230,255,${d.opacity})`;
+        ctx.lineWidth = d.thickness;
+        ctx.moveTo(d.x, d.y);
+        ctx.lineTo(d.x + d.sway * 8, d.y + d.len);
+        ctx.stroke();
+      }
+
+      // occasional ripple (subtle)
+      requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('resize', reset);
+    reset();
+    requestAnimationFrame(draw);
+  })();
+
+  // ------------------------
+  // Notes data (original)
+  // ------------------------
+  const NOTES = {
+    "mathematics": {
+      title: "Mathematics (IGCSE / AS-A Level core concepts)",
+      price: 4.99,
+      content:
 `Mathematics — Comprehensive Study Notes
 
 1. Number System & Arithmetic
 - Real numbers: integers, rationals, irrationals, decimals and surds. Rationalize denominators; simplify surds using prime factorization.
-- Indices (exponents): laws of indices (amplitude, product, quotient, negative indices, fractional indices). Use index rules to simplify algebraic expressions.
-- Standard form/Scientific notation: express large and small numbers as a × 10^n where 1 ≤ a < 10; useful for significant figures and calculator entry.
+- Indices (exponents): product, quotient, negative and fractional indices. Use index rules to simplify algebraic expressions.
+- Standard form: a × 10^n with 1 ≤ a < 10; useful for significant figures.
 
 2. Algebra
-- Simplifying expressions: collect like terms, factor quadratics (ax^2+bx+c), complete the square, factor by grouping.
-- Solving equations: linear, quadratic (factorisation, completing square, quadratic formula), simultaneous equations (substitution, elimination), linear-quadratic systems.
-- Inequalities: represent solution sets on a number line; solve linear and quadratic inequalities; interval notation.
-- Functions: concept of function, domain, range, composition f(g(x)), inverse functions for one-to-one mappings.
-- Sequences: arithmetic and geometric sequences, nth term formula, sum formulas (arithmetic sum = n/2( first + last ); geometric sum = a(1-r^n)/(1-r)).
+- Simplifying expressions, factorisation, completing the square. Solve linear, quadratic and simultaneous equations. Inequalities and functions (domain, range).
 
 3. Coordinate Geometry & Graphs
-- Equation of a line: y = mx + c, gradient m, intercept c, parallel/perpendicular lines.
-- Circles, parabolas: standard forms, completing the square to find center/radius; parabola y=ax^2+bx+c properties — vertex, axis of symmetry, roots.
-- Transformations: translations, reflections, rotations, enlargements affecting function equations.
+- Lines (y = mx + c); circles and parabolas; transformations and sketching.
 
 4. Trigonometry
-- Basic ratios: sin, cos, tan; Pythagorean identity sin^2θ + cos^2θ = 1.
-- Radians and degrees: conversion (π rad = 180°), arc length s = rθ, sector area = 0.5 r^2 θ.
-- Trig identities and solving trig equations in required domain; small-angle approximations for sinθ ≈ θ (radians).
-- Laws for triangles: sine rule a/sinA = b/sinB = c/sinC, cosine rule c^2 = a^2 + b^2 - 2ab cosC.
+- sin, cos, tan; radian measure; sine & cosine rules for general triangles.
 
-5. Calculus (AS/A-level core)
-- Limits and continuity: conceptual approach; limit laws.
-- Differentiation: derivative as slope/instantaneous rate of change. Power rule, product rule, quotient rule, chain rule. Derivatives of trig, exponential and logarithmic functions.
-- Applications: tangents and normals, maxima/minima (use second derivative where appropriate), kinematics (velocity = derivative of displacement).
-- Integration: antiderivatives, definite integrals as area under a curve, fundamental theorem of calculus. Methods: substitution, integration by parts (A·B - ∫B·dA).
-- Applications: area between curves, volumes of revolution (π ∫ y^2 dx), displacement/total distance from velocity.
+5. Calculus (AS/A-level)
+- Limits, differentiation (power, product, chain rules), integration, applications (area, kinematics).
 
-6. Geometry & Vectors
-- Euclidean geometry: angles, cyclic quadrilaterals, properties of triangles, similarity and congruence proofs.
-- Vectors: representation, addition, scalar multiplication, dot product and geometric interpretation, vector equations of a line.
+6. Vectors & Geometry
+- Vector addition, scalar multiples, dot product, geometric proofs.
 
 7. Probability & Statistics
-- Probability basics: rules (0 ≤ P ≤ 1), addition and multiplication rules, conditional probability, independence.
-- Combinatorics: permutations and combinations (nPr, nCr).
-- Statistics: mean, median, mode, variance, standard deviation. Interpret histograms, box plots, cumulative frequency, percentiles.
-- Regression & correlation (introductory): line of best fit, interpreting correlation coefficient.
+- Basic probability, permutations/combinations, mean/median/mode, variance & standard deviation.
 
-Exam Tips:
-- Show all working steps clearly; use exact forms (fractions, surds) where required.
-- Check units in applied problems; draw diagrams to scale; label clearly.
-- Practice past papers to understand command words: calculate, show that, prove, evaluate, determine.
-
-Formulas Quick Reference:
-- Quadratic formula: x = [-b ± sqrt(b^2 - 4ac)]/(2a)
-- Area of triangle: 0.5 × base × height; Heron’s formula s = 0.5(a+b+c), area = sqrt(s(s-a)(s-b)(s-c))
-- Circle: circumference = 2πr, area = πr^2
-- Differentiation power rule: d/dx[x^n] = n x^(n-1)
-- Integration power rule: ∫ x^n dx = x^(n+1)/(n+1) + C (n ≠ -1)`
-
-      },
-      "physics": {
-        title: "Physics (IGCSE / AS-A Level core concepts)",
-        price: 4.99,
-        content:
+Exam tips:
+- Show full working. Use exact forms (fractions/surds) when asked. Practice past papers.`
+    },
+    "physics": {
+      title: "Physics (IGCSE / AS-A Level core concepts)",
+      price: 4.99,
+      content:
 `Physics — Comprehensive Study Notes
 
 1. Mechanics
-- Kinematics: displacement vs distance, velocity (v = ds/dt), acceleration (a = dv/dt). SUVAT equations for constant acceleration:
-  s = ut + 1/2 at^2, v = u + at, v^2 = u^2 + 2as.
-- Forces & Newton’s laws: 1) inertia, 2) F = ma (vector), 3) action–reaction pairs. Free-body diagrams, equilibrium conditions (sum of forces = 0).
-- Work, energy, power: Work = F·s (dot product), kinetic energy KE = 1/2 mv^2, potential energy (gravitational) = mgh, conservation of energy, efficiency = (useful energy output / input) × 100%.
-- Momentum: p = mv, impulse = Δp = FΔt, conservation of momentum in collisions (elastic vs inelastic).
+- Kinematics: displacement, velocity, acceleration. SUVAT equations for constant acceleration.
+- Forces & Newton's laws: F = ma, free-body diagrams, equilibrium.
 
-2. Materials & Properties
-- Stress = force/area; strain = extension/original length; Young’s modulus E = stress/strain. Elastic vs plastic deformation; Hooke’s law F = kx for springs (elastic region).
+2. Energy & Momentum
+- Work, energy, power: KE = 1/2 mv^2, PE = mgh. Conservation of energy and momentum.
 
 3. Waves & Optics
-- Wave basics: wavelength λ, frequency f, wave speed v = fλ. Longitudinal vs transverse waves.
-- Sound: speed in air, pitch and loudness, Doppler effect basics.
-- Light & optics: reflection, refraction (Snell's law n1 sinθ1 = n2 sinθ2), total internal reflection and critical angle. Thin lens formula 1/f = 1/v + 1/u and magnification.
+- Wave properties, refraction (Snell's law), lens formula 1/f = 1/u + 1/v.
 
 4. Electricity & Magnetism
-- Circuit basics: current I (A), voltage V (potential difference), resistance R (Ω), Ohm’s law V = IR. Series and parallel circuits: voltage/current rules and equivalent resistances.
-- Electrical power: P = VI = I^2 R = V^2 / R.
-- Electromagnetism: magnetic fields around current-carrying wires; Fleming’s left-hand rule for motors (force), right-hand rule for fields; Faraday’s law of induction: induced emf = -dΦ/dt (magnetic flux change).
+- Current, voltage, resistance (Ohm's law). Circuits, EM induction (Faraday's law).
 
-5. Thermal Physics
-- Temperature vs heat: specific heat capacity c where Q = mcΔT; latent heat L for phase changes Q = mL.
-- Kinetic theory: particles’ average kinetic energy relates to temperature; pressure = force/area from particle collisions (link to ideal gas law PV = nRT).
+5. Thermal Physics & Modern Physics
+- Specific heat, latent heat, photoelectric effect basics.
 
-6. Modern Physics (AS level intro)
-- Photoelectric effect: photon energy E = hf, threshold frequency, work function; demonstrates particle nature of light.
-- Radioactivity: types of decay (alpha, beta, gamma), half-life and exponential decay N = N0 e^{-λt}, activity A = λN.
-
-7. Practical & Measurement
-- SI units, significant figures, uncertainties and propagation of errors: absolute and fractional uncertainties, adding relative uncertainties for multiplication/division.
-
-Exam Tips:
-- Draw diagrams and show vector directions. Label diagrams carefully.
-- Use units consistently; check magnitudes for reasonableness (order-of-magnitude).
-- Remember sign conventions for displacement, velocity and acceleration.`
-
-      },
-      "chemistry": {
-        title: "Chemistry (IGCSE / AS-A Level core concepts)",
-        price: 4.99,
-        content:
+Practical:
+- Use units, show calculations, handle uncertainties.`
+    },
+    "chemistry": {
+      title: "Chemistry (IGCSE / AS-A Level core concepts)",
+      price: 4.99,
+      content:
 `Chemistry — Comprehensive Study Notes
 
 1. Atomic Structure & Periodic Table
-- Atoms: nucleus (protons + neutrons) and electrons. Atomic number (Z), mass number (A). Isotopes differ by neutron count.
-- Electronic configuration: shells and subshells, periodic trends: atomic radius, ionisation energy, electronegativity.
-- Periodic groups: group properties — alkali metals (reactivity with water), halogens (diatomic, reactivity), noble gases (inert).
+- Atoms, isotopes, electron configurations and periodic trends.
 
-2. Chemical Bonding & Structure
-- Ionic bonding: transfer of electrons, formation of cations/anions; lattice structures; properties: high melting points, conduct when molten/dissolved.
-- Covalent bonding: electron sharing; single/double/triple bonds. Electronegativity differences lead to polar covalent bonds and dipole moments.
-- Metallic bonding: sea of delocalised electrons, conductivity, malleability.
-- Intermolecular forces: London dispersion, dipole-dipole, hydrogen bonding (strongest among intermolecular). Explain boiling point trends.
+2. Bonding & Structure
+- Ionic, covalent, metallic bonding; intermolecular forces.
 
-3. Stoichiometry & Quantitative Chemistry
-- Mole concept: Avogadro’s number (6.022×10^23), molar mass, conversions between mass, moles, particles.
-- Empirical and molecular formula calculations; reacting masses and volumes; limiting reagent and percentage yield.
-- Concentrations: molarity (mol L^-1), titrations calculations for acids/bases; volumetric glassware and technique.
+3. Quantitative Chemistry
+- Mole concept, stoichiometry, titration calculations, concentration (mol/L).
 
-4. Chemical Energetics
-- Exothermic vs endothermic reactions; enthalpy change ΔH. Energy profile diagrams: activation energy, reaction profile and catalysts.
-- Hess’s law for enthalpy calculations from known steps.
+4. Energetics & Equilibrium
+- Exothermic/endothermic, Hess' law, Le Chatelier's principle, rate laws.
 
-5. Reaction Rates & Chemical Equilibrium
-- Collision theory: rate depends on frequency of effective collisions; factors: concentration, temperature, surface area, catalysts.
-- Rate equations: order of reaction, rate constant k, half-life for first-order reactions.
-- Chemical equilibrium: dynamic equilibrium, Le Chatelier’s principle (pressure, concentration, temperature effects), equilibrium constant Kc.
+5. Organic Basics
+- Functional groups, isomerism, common reaction types (addition, substitution, oxidation).
 
-6. Acids, Bases & Redox
-- pH scale and [H+], acid strength (pKa basics), strong vs weak acids/bases. Neutralisation reactions.
-- Oxidation numbers rules, identifying redox reactions, balancing redox equations (half-equation method).
-
-7. Organic Chemistry (intro and functional groups)
-- Basic functional groups: alkanes, alkenes, alkynes, alcohols, haloalkanes, carbonyls (aldehydes & ketones), carboxylic acids, esters, amines.
-- Isomerism: structural (chain, position, functional) and stereoisomerism (E/Z, R/S basics).
-- Common reactions: addition to alkenes, substitution in haloalkanes, esterification, oxidation of alcohols.
-- Polymerisation and environmental considerations (biodegradable vs persistent plastics).
-
-Practical Tips:
-- Familiarise yourself with hazard symbols and safe lab practice.
-- Practice mole and titration calculations until they are routine.
-- Use the periodic table to predict formulas and reaction stoichiometry.`
-
-      },
-      "biology": {
-        title: "Biology (IGCSE / AS-A Level core concepts)",
-        price: 4.99,
-        content:
+Lab tips:
+- Familiarise with titration technique and safe handling.`
+    },
+    "biology": {
+      title: "Biology (IGCSE / AS-A Level core concepts)",
+      price: 4.99,
+      content:
 `Biology — Comprehensive Study Notes
 
 1. Cell Biology
-- Cell theory: cells are basic units of life. Prokaryotic vs eukaryotic cells: prokaryotes lack membrane-bound organelles and nucleus.
-- Organelles and functions: nucleus (DNA), mitochondria (ATP production), ribosomes (protein synthesis), endoplasmic reticulum, Golgi apparatus, lysosomes, chloroplasts (photosynthesis in plants), cell membrane (fluid mosaic model; transport).
-- Membrane transport: diffusion, osmosis (water potential), facilitated diffusion, active transport (ATP-driven pumps), endocytosis/exocytosis.
+- Structure of prokaryotic and eukaryotic cells; membrane transport (diffusion, osmosis, active transport).
 
-2. Genetics & Inheritance
-- DNA structure: double helix of nucleotides (sugar-phosphate backbone, paired bases A-T and C-G). Genes code for proteins via transcription (mRNA) and translation (ribosomes).
-- Mitosis and meiosis: mitosis for growth/repair (diploid -> diploid); meiosis for gamete formation (reduces chromosome number, introduces variation via crossing over).
-- Inheritance patterns: dominant/recessive alleles, homozygous/heterozygous, Punnett squares, co-dominance, sex-linked traits and pedigree analysis.
+2. Genetics
+- DNA, transcription, translation, meiosis & mitosis, inheritance patterns.
 
-3. Physiology & Homeostasis
-- Plant physiology: photosynthesis (light-dependent and Calvin cycle) — general equation 6CO2 + 6H2O -> C6H12O6 + 6O2. Transport in plants: xylem (water) and phloem (sugars).
-- Human physiology: circulation (heart structure — chambers, valves; blood vessels: arteries, veins, capillaries), respiration (lungs, gas exchange, ventilation mechanics), digestion (enzymes: amylase, lipase, proteases).
-- Nervous system & hormones: neuron structure, synapses, action potentials; endocrine glands and hormone functions for coordination and homeostasis.
+3. Human & Plant Physiology
+- Circulatory, respiratory, digestive systems; photosynthesis and plant transport.
 
 4. Ecology & Evolution
-- Ecosystems: producers, consumers, decomposers; energy flow & food webs; pyramid of energy/biomass/number.
-- Populations: limiting factors, carrying capacity, succession, biodiversity and conservation.
-- Evolutionary theory: natural selection, adaptation, speciation, evidence from fossils/molecular data.
+- Food webs, energy flow, natural selection, speciation.
 
-5. Microbiology & Immunology
-- Microorganisms: bacteria, viruses (acellular), fungi, protozoa. Roles in disease, fermentation, decomposition.
-- Immune responses: non-specific (skin, phagocytosis) and specific (antibody-mediated humoral immunity, cell-mediated response, vaccines and memory cells).
-
-Practical Skills:
-- Microscopy: magnification, resolution, preparing slides.
-- Experimental design: controls, repeat measurements, reducing bias, calculating rates and interpreting data.`
-
-      },
-      "english": {
-        title: "English Language (IGCSE) — Reading & Writing Skills",
-        price: 4.99,
-        content:
+Practical:
+- Emphasise experimental design, control variables and repeatability.`
+    },
+    "english": {
+      title: "English Language (IGCSE) — Reading & Writing Skills",
+      price: 4.99,
+      content:
 `English Language — Comprehensive Study Notes
 
-1. Reading Skills (Comprehension & Analysis)
-- Active reading: identify main idea, tone, viewpoint, purpose (to inform, persuade, entertain), and target audience.
-- Structural features: opening/closing, paragraph development, topic sentences, use of examples. Identify progression (chronological, cause/effect, compare/contrast).
-- Language features: imagery, simile & metaphor, personification, alliteration, hyperbole, rhetorical questions, repetition. Evaluate effect on reader and purpose.
-- Inference & deduction: read between the lines; use context to deduce meaning; support answers with textual evidence (quotes and brief explanation).
+1. Reading
+- Identify main idea, tone, purpose, register. Analyse language features (imagery, rhetorical devices).
 
-2. Writing Skills (Composition & Transactional)
-- Writing clearly: planning, paragraphing (one idea per paragraph), topic sentence, supporting evidence, concluding sentence.
-- Tone and register: adapt to audience (formal / informal), purpose (to argue, inform, advise). Use appropriate vocabulary and sentence structures.
-- Persuasive writing: make a clear position, use rhetorical techniques (rule of three, rhetorical question, emotive language), present facts and counter-arguments.
-- Descriptive writing: sensory details (sight, sound, smell, touch, taste), fresh metaphors, varied sentence lengths, and show-don’t-tell technique.
-- Discursive/essay structure: introduction (thesis), balanced paragraphs (point, evidence, explanation), conclusion (restate and synthesize).
+2. Writing
+- Plan structure, paragraph development, tone adaptation. Persuasive techniques and descriptive detail.
 
-3. Grammar & Sentence-Level Features
-- Sentence types: simple, compound, complex. Use subordinate clauses for variety.
-- Punctuation: commas for lists and clauses, semicolons for closely linked ideas, colons for lists/explanations, apostrophes for possession/omission, correct use of quotation marks.
-- Common errors: subject-verb agreement, tense consistency, run-on sentences, comma splices.
+3. Grammar
+- Sentence structures, punctuation rules, avoiding common errors.
 
-4. Summary & Note-Making
-- Summarising: identify main points and omit detail; paraphrase in your own words; keep it concise (often 1/3 or 1/4 of original depending on task).
-- Note-taking formats: bullet points, headings, key words; use abbreviations and symbols to save time.
-
-Exam Tips:
-- For reading: annotate the text, underline key phrases, quote selectively and explain.
-- For writing: plan for 5–10 minutes, maintain clear structure, check spelling/grammar if time allows.`
-
-      },
-      "economics": {
-        title: "Economics (IGCSE / AS Intro)",
-        price: 4.99,
-        content:
+Exam tips:
+- Annotate passages, use relevant quotes and explain their effect.`
+    },
+    "economics": {
+      title: "Economics (IGCSE / AS Intro)",
+      price: 4.99,
+      content:
 `Economics — Comprehensive Study Notes
 
 1. Basic Economic Problem
-- Scarcity: limited resources vs unlimited wants. Choices and opportunity cost (what is forgone).
-- Factors of production: land, labour, capital, entrepreneurship. Production possibility frontier (PPF) shows trade-offs and efficiency.
+- Scarcity, choices, opportunity cost, PPF concept.
 
 2. Demand & Supply
-- Demand: law of demand (price up → quantity demanded down), determinants (income, tastes, prices of related goods, expectations).
-- Supply: law of supply (price up → quantity supplied up), determinants (production costs, technology, taxes/subsidies).
-- Market equilibrium: where supply = demand. Shifts vs movements along curves. Price elasticity of demand (PED) and supply (PES): percent change formulas; elastic vs inelastic.
+- Determinants, elasticity (PED/PES), movements vs shifts.
 
-3. Market Structures & Market Failure
-- Types: perfect competition, monopoly, oligopoly, monopolistic competition — distinguishing features and effects on price/efficiency.
-- Market failure: externalities (positive/negative), public goods, information asymmetry. Role of government: regulation, taxes/subsidies, provision of public goods.
+3. Macroeconomics
+- AD components, inflation, unemployment, fiscal & monetary policy.
 
-4. Macroeconomics Essentials
-- Aggregate demand (AD) components: C + I + G + (X − M). Short-run fluctuations and business cycle phases.
-- Inflation: demand-pull vs cost-push inflation, CPI and consequences (menu costs, reduced purchasing power).
-- Unemployment: types (frictional, structural, cyclical), measurement and social costs.
-- Fiscal policy and monetary policy: government spending, taxation, central bank interest rate tools, exchange rates.
+4. Market Failure & Trade
+- Externalities, public goods, comparative advantage.`
+    },
+    "history": {
+      title: "History (Modern World themes)",
+      price: 4.99,
+      content:
+`History — Comprehensive Study Notes
 
-5. International Trade & Development
-- Benefits of trade: specialization, comparative advantage. Exchange rates basics and balance of payments.
-- Economic development indicators: GDP per capita, GNI, HDI. Policies for development: investment in education/infrastructure, microfinance, trade policy.
+1. Causes of Conflict
+- Nationalism, imperialism, alliances, triggers and long-term causes.
 
-Exam Tips:
-- Define terms clearly; show diagrams and label axes correctly.
-- Use real-world examples where appropriate, and explain cause-effect links step-by-step.`
+2. 20th Century Themes
+- World Wars, interwar instability, rise of extremist regimes, Cold War overview.
 
-      },
-      "history": {
-        title: "History (Modern World themes) — Study Notes",
-        price: 4.99,
-        content:
-`History — Comprehensive Study Notes (Modern World Themes)
+3. Decolonisation & Development
+- Processes of independence, economic and social challenges.
 
-1. Causes of Conflict & World Wars
-- Long-term causes: nationalism, imperial rivalries, militarism, alliance systems. Short-term trigger examples (e.g., assassination sparking conflict).
-- Trench warfare & WWI features: stalemate, new technologies (machine guns, tanks, chemical warfare). Social and economic impacts including casualty scale, homefront mobilization, and war economies.
-- Treaty settlements and consequences: reparations, territorial changes, and how punitive treaties can fuel future instability.
-
-2. Interwar Years & Rise of Extremism
-- Economic instability (Great Depression) and its political consequences: rise of extremist parties, authoritarian regimes promising stability and revival.
-- Case studies: emergence of fascism and Nazism — causes, ideology, propaganda, and methods of consolidating power.
-
-3. Cold War Overview
-- Bipolar world order: ideological struggle between capitalist (US) and communist (USSR) blocs. Key events: Berlin Blockade, Korean War, Cuban Missile Crisis, Vietnam War.
-- Policies: containment, deterrence, domino theory; arms race and proxy wars; détente and eventual end with Soviet collapse.
-
-4. Decolonisation & Nationalism
-- Process of decolonisation: post-WWII independence movements, negotiation and conflict, emergence of new nation-states.
-- Challenges faced by new states: political instability, economic dependency, identity and border disputes.
-
-5. Social & Economic Change in the 20th Century
-- Industrialization, urbanization, and technological change; social reforms (welfare state, suffrage expansions).
-- Globalization drivers: trade, multinational corporations, information technology, cultural exchanges.
-
-Exam Tips:
-- Use specific case studies with dates and key figures but focus analysis on cause-effect and significance.
-- Practice source analysis: identify origin, purpose, audience, value and limitation of primary sources.`
-
-      }
-    }; // end NOTES
-
-    // ---------- Utility functions ----------
-    const STORAGE_KEY = 'caie_unlocked_subjects_v1';
-
-    function loadUnlocked() {
-      try {
-        const v = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-        return Array.isArray(v) ? v : [];
-      } catch (e) {
-        return [];
-      }
+Exam tips:
+- Use specific examples and dates, practice source evaluation and cause-effect analysis.`
     }
-    function saveUnlocked(list) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-    }
-    function unlockSubject(key) {
-      const list = loadUnlocked();
-      if (!list.includes(key)) {
-        list.push(key);
-        saveUnlocked(list);
-      }
-    }
-    function lockAll() {
-      saveUnlocked([]);
-    }
-    function unlockAll() {
-      const keys = Object.keys(NOTES);
-      saveUnlocked(keys);
-    }
-    function isUnlocked(key) {
-      return loadUnlocked().includes(key);
-    }
+  };
 
-    // ---------- UI rendering ----------
-    const subjectsGrid = document.getElementById('subjectsGrid');
-    const noteView = document.getElementById('noteView');
-    const noteTitle = document.getElementById('noteTitle');
-    const noteContent = document.getElementById('noteContent');
-    const backBtn = document.getElementById('backBtn');
-    const downloadBtn = document.getElementById('downloadBtn');
-    const printBtn = document.getElementById('printBtn');
-    const unlockAllBtn = document.getElementById('unlockAllBtn');
-    const exportAllBtn = document.getElementById('exportAllBtn');
-    document.getElementById('year').innerText = new Date().getFullYear();
+  // ------------------------
+  // UI & storage helpers
+  // ------------------------
+  const STORAGE_KEY = 'caie_forest_unlocked_v1';
+  function loadUnlocked() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+    catch { return []; }
+  }
+  function saveUnlocked(arr) { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
+  function isUnlocked(k) { return loadUnlocked().includes(k); }
+  function unlock(k) { const arr = loadUnlocked(); if (!arr.includes(k)) { arr.push(k); saveUnlocked(arr); } }
+  function lockAll() { saveUnlocked([]); }
+  function unlockAll() { saveUnlocked(Object.keys(NOTES)); }
 
-    function createCard(key, data) {
-      const unlocked = isUnlocked(key);
-      const card = document.createElement('div');
-      card.className = 'p-4 bg-white rounded shadow';
-      card.innerHTML = `
-        <h3 class="font-bold text-lg">${data.title}</h3>
-        <p class="text-sm text-slate-600 mt-1">Price: $${data.price.toFixed(2)} (demo)</p>
-        <div class="mt-4 flex gap-2">
-          <button data-key="${key}" class="viewBtn px-3 py-1 border rounded">${unlocked ? 'View notes' : 'Preview'}</button>
-          ${unlocked ? `<button data-key="${key}" class="downloadBtn px-3 py-1 border rounded">Download</button>` : `<button data-key="${key}" class="buyBtn px-3 py-1 bg-indigo-600 text-white rounded">Buy $${data.price.toFixed(2)}</button>`}
+  // ------------------------
+  // Render subject cards
+  // ------------------------
+  const subjectsGrid = document.getElementById('subjectsGrid');
+  const modal = document.getElementById('modal');
+  const modalBackdrop = document.getElementById('modalBackdrop');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalContent = document.getElementById('modalContent');
+  const modalClose = document.getElementById('modalClose');
+  const modalDownload = document.getElementById('modalDownload');
+  const modalPrint = document.getElementById('modalPrint');
+
+  function createCard(key, data) {
+    const unlocked = isUnlocked(key);
+    const div = document.createElement('div');
+    div.className = 'p-4 rounded-xl glass card-hover transition transform';
+    div.innerHTML = `
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <h4 class="text-lg font-semibold text-sky-100">${data.title}</h4>
+          <p class="text-sm text-slate-300 mt-2">${data.content.split('\\n')[0].slice(0,120)}...</p>
         </div>
-      `;
-      return card;
+        <div class="text-right">
+          <div class="mb-2">
+            <span class="text-xs text-slate-300">Price</span>
+            <div class="text-xl font-bold text-sky-200">$${data.price.toFixed(2)}</div>
+          </div>
+          <div class="flex flex-col items-end gap-2">
+            ${unlocked ? `<button class="openBtn px-3 py-2 rounded-md border text-sky-100">Open</button>
+                          <button class="downloadBtn px-3 py-2 rounded-md border text-sky-100">Download</button>`
+                       : `<button class="unlockBtn px-3 py-2 rounded-md bg-indigo-600 text-white">Unlock</button>`}
+          </div>
+        </div>
+      </div>
+    `;
+    // events
+    setTimeout(()=> {
+      const unlockBtn = div.querySelector('.unlockBtn');
+      const openBtn = div.querySelector('.openBtn');
+      const downloadBtn = div.querySelector('.downloadBtn');
+      if (unlockBtn) unlockBtn.addEventListener('click', () => handleUnlock(key));
+      if (openBtn) openBtn.addEventListener('click', () => openModal(key));
+      if (downloadBtn) downloadBtn.addEventListener('click', () => downloadSubject(key));
+    }, 0);
+    return div;
+  }
+
+  function renderSubjects() {
+    subjectsGrid.innerHTML = '';
+    for (const [k,d] of Object.entries(NOTES)) {
+      subjectsGrid.appendChild(createCard(k,d));
     }
+  }
 
-    function renderGrid() {
-      subjectsGrid.innerHTML = '';
-      for (const [key, data] of Object.entries(NOTES)) {
-        const card = createCard(key, data);
-        subjectsGrid.appendChild(card);
-      }
-      // attach event listeners
-      document.querySelectorAll('.viewBtn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const key = e.currentTarget.dataset.key;
-          if (isUnlocked(key)) showNote(key);
-          else showPreview(key);
-        });
-      });
-      document.querySelectorAll('.buyBtn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const key = e.currentTarget.dataset.key;
-          // Simulated payment flow
-          const confirmPurchase = confirm(`This is a simulated purchase for "${NOTES[key].title}". Click OK to unlock.`);
-          if (confirmPurchase) {
-            unlockSubject(key);
-            alert('Unlocked! You can now view the notes.');
-            renderGrid();
-          }
-        });
-      });
-      document.querySelectorAll('.downloadBtn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const key = e.currentTarget.dataset.key;
-          downloadTextFile(key, NOTES[key].title + '.txt', NOTES[key].content);
-        });
-      });
+  // ------------------------
+  // Modal & actions
+  // ------------------------
+  function openModal(key) {
+    const data = NOTES[key];
+    modalTitle.textContent = data.title;
+    modalContent.textContent = data.content;
+    modal.classList.remove('hidden');
+    // download handler
+    modalDownload.onclick = () => downloadString(`${data.title}.txt`, `${data.title}\n\n${data.content}`);
+    modalPrint.onclick = () => {
+      const printWindow = window.open('', '_blank', 'width=800,height=600');
+      printWindow.document.write(`<pre style="white-space:pre-wrap;font-family:inherit;font-size:14px;">${escapeHtml(data.title + "\n\n" + data.content)}</pre>`);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(()=>printWindow.print(), 400);
     }
+  }
+  function closeModal() { modal.classList.add('hidden'); }
 
-    function showPreview(key) {
-      const data = NOTES[key];
-      noteTitle.innerText = data.title + ' — Preview';
-      // show first 800 characters as preview
-      const preview = data.content.slice(0, 1000) + (data.content.length > 1000 ? '\n\n[...trimmed — purchase to read full notes]' : '');
-      noteContent.innerText = preview;
-      noteView.classList.remove('hidden');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      // attach a quick buy button in preview
-      const buyLine = document.createElement('div');
-      buyLine.className = 'mt-4';
-      buyLine.innerHTML = `<button id="previewBuy" class="px-3 py-1 bg-indigo-600 text-white rounded">Buy $${data.price.toFixed(2)}</button>`;
-      noteContent.parentElement.appendChild(buyLine);
-      document.getElementById('previewBuy').addEventListener('click', () => {
-        const confirmBuy = confirm(`Simulated purchase for "${data.title}". Click OK to unlock.`);
-        if (confirmBuy) {
-          unlockSubject(key);
-          alert('Unlocked. Reloading note...');
-          // remove preview buy button then show full
-          buyLine.remove();
-          showNote(key);
-          renderGrid();
-        }
-      });
+  modalBackdrop.addEventListener('click', closeModal);
+  modalClose.addEventListener('click', closeModal);
+
+  function handleUnlock(key) {
+    // Simulated purchase flow: show a gentle animated confirmation
+    const ok = confirm(`Simulated payment — unlock "${NOTES[key].title}" for $${NOTES[key].price.toFixed(2)}?`);
+    if (!ok) return;
+    unlock(key);
+    renderSubjects();
+    openModal(key);
+  }
+
+  // ------------------------
+  // Download helpers
+  // ------------------------
+  function downloadSubject(key) {
+    const d = NOTES[key];
+    downloadString(`${d.title}.txt`, `${d.title}\n\n${d.content}`);
+  }
+
+  function downloadString(filename, text) {
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // utility
+  function escapeHtml(s) {
+    return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  }
+
+  // ------------------------
+  // Top bar actions
+  // ------------------------
+  document.getElementById('unlockAllBtn').addEventListener('click', () => {
+    if (confirm('Simulated unlock all notes for this browser?')) {
+      unlockAll();
+      renderSubjects();
+      alert('All subjects unlocked (demo).');
     }
+  });
 
-    function showNote(key) {
-      const data = NOTES[key];
-      noteTitle.innerText = data.title;
-      noteContent.innerText = data.content;
-      noteView.classList.remove('hidden');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      // set download button action
-      downloadBtn.onclick = () => downloadTextFile(key, data.title + '.txt', data.content);
+  document.getElementById('exportAllBtn').addEventListener('click', () => {
+    let combined = '';
+    for (const d of Object.values(NOTES)) combined += `=== ${d.title} ===\n\n${d.content}\n\n\n`;
+    downloadString('CAIE_All_Notes.txt', combined);
+  });
+
+  // demo lock button
+  document.getElementById('demoLockBtn').addEventListener('click', () => {
+    if (confirm('Clear unlocked state (lock all)?')) { lockAll(); renderSubjects(); alert('All locked.'); }
+  });
+
+  document.getElementById('demoInfoBtn').addEventListener('click', () => {
+    alert('These notes are original educational summaries (not official Cambridge materials). Use Download to save them.');
+  });
+
+  // keyboard shortcut shift+L to lock
+  window.addEventListener('keydown', (e) => {
+    if (e.shiftKey && e.key.toLowerCase() === 'l') {
+      if (confirm('Clear unlocked state (lock all)?')) { lockAll(); renderSubjects(); alert('All locked.'); }
     }
+  });
 
-    backBtn.addEventListener('click', () => {
-      noteView.classList.add('hidden');
-      // remove any preview buy leftover
-      const extra = noteContent.parentElement.querySelector('#previewBuy');
-      if (extra) extra.remove();
-    });
-    printBtn.addEventListener('click', () => window.print());
+  // initialize
+  renderSubjects();
+  document.getElementById('year').textContent = new Date().getFullYear();
 
-    unlockAllBtn.addEventListener('click', () => {
-      const ok = confirm('Simulated unlock all subjects? This stores unlocked state in your browser only.');
-      if (ok) {
-        unlockAll();
-        alert('All subjects unlocked (demo).');
-        renderGrid();
-      }
-    });
-
-    exportAllBtn.addEventListener('click', () => {
-      // combine everything into a single text file
-      let all = '';
-      for (const [k, d] of Object.entries(NOTES)) {
-        all += `=== ${d.title} ===\n\n`;
-        all += d.content + '\n\n\n';
-      }
-      downloadStringAsFile('CAIE_All_Notes.txt', all);
-    });
-
-    function downloadTextFile(key, filename, text) {
-      downloadStringAsFile(filename, `${NOTES[key].title}\n\n${text}`);
-    }
-
-    function downloadStringAsFile(filename, content) {
-      const blob = new Blob([content], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    }
-
-    // Initialize grid on load
-    renderGrid();
-
-    // small UX: show a welcome modal once
-    if (!localStorage.getItem('caie_seen_welcome_v1')) {
-      alert('Welcome — this file contains original CAIE-style study notes. Purchases are simulated locally. Use Download to save notes as .txt.');
-      localStorage.setItem('caie_seen_welcome_v1', '1');
-    }
-
-    // Accessibility: keyboard shortcut to lock all (shift+L)
-    window.addEventListener('keydown', (e) => {
-      if (e.shiftKey && e.key.toLowerCase() === 'l') {
-        if (confirm('Lock (clear) all unlocked subjects?')) {
-          lockAll();
-          renderGrid();
-          alert('All locked.');
-        }
-      }
-    });
+  // accessibility: close modal with Escape
+  window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
 
   </script>
 </body>
