@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>CAIE Notes — Forest Rain UI Demo PayFast</title>
+  <title>CAIE Notes — Forest Rain UI with Demo PayFast</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     html,body { height: 100%; margin:0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
@@ -40,14 +40,20 @@
     .grid-cols-responsive { grid-template-columns: repeat(1, minmax(0,1fr)); }
     @media(min-width: 640px) { .grid-cols-responsive { grid-template-columns: repeat(2, minmax(0,1fr)); } }
     @media(min-width: 1024px) { .grid-cols-responsive { grid-template-columns: repeat(3, minmax(0,1fr)); } }
-    .btn-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      align-items: flex-end;
+    /* Spinner */
+    .spinner {
+      border: 3px solid rgba(255,255,255,0.2);
+      border-top-color: white;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 8px;
     }
-    .btn-group button {
-      min-width: 96px;
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
   </style>
 </head>
@@ -61,8 +67,8 @@
     <header class="py-6">
       <div class="max-w-6xl mx-auto px-4 flex items-center justify-between">
         <div>
-          <h1 class="text-3xl font-extrabold tracking-tight drop-shadow-md">🌲 CAIE Notes — Forest Edition Demo PayFast</h1>
-          <p class="text-slate-300 mt-1">Demo: Unlock buttons open PayFast payment page URL in new tab.</p>
+          <h1 class="text-3xl font-extrabold tracking-tight drop-shadow-md">🌲 CAIE Notes — Forest Edition</h1>
+          <p class="text-slate-300 mt-1">Original, syllabus-aligned study notes. Unlock to read. (Payments simulated — stored locally.)</p>
         </div>
         <div class="flex items-center gap-3">
           <button id="unlockAllBtn" class="px-3 py-2 rounded-md glass text-sky-200 hover:bg-white/5 transition">Unlock All</button>
@@ -75,8 +81,8 @@
       <div class="max-w-6xl mx-auto px-4 pb-12">
         <section class="grid gap-6 grid-cols-responsive">
           <div class="glass rounded-2xl p-6 flex flex-col gap-4">
-            <h2 class="text-xl font-semibold">How it works (Demo)</h2>
-            <p class="text-slate-300">Click Unlock on a subject to open a simulated PayFast payment page URL in a new tab (no actual payment).</p>
+            <h2 class="text-xl font-semibold">How it works</h2>
+            <p class="text-slate-300">Click a subject card to preview. Click <strong>Unlock</strong> to simulate purchase — a PayFast-style demo payment will appear. Unlocks persist locally. Use <em>Download</em> to save notes as .txt files.</p>
             <div class="flex gap-3">
               <button id="demoLockBtn" class="px-4 py-2 bg-indigo-600 rounded-md shadow hover:brightness-105">Demo: Lock All (Shift+L)</button>
               <button id="demoInfoBtn" class="px-4 py-2 border rounded-md">About Notes</button>
@@ -94,6 +100,7 @@
     </main>
   </div>
 
+  <!-- Notes modal -->
   <div id="modal" class="fixed inset-0 hidden items-center justify-center z-20">
     <div class="absolute inset-0 bg-black/50" id="modalBackdrop"></div>
     <div class="relative max-w-4xl w-full mx-4">
@@ -101,9 +108,9 @@
         <div class="flex items-start justify-between gap-4">
           <h2 id="modalTitle" class="text-2xl font-bold text-sky-100"></h2>
           <div class="flex gap-2">
-            <button id="modalDownload" class="px-3 py-2 border rounded text-sky-100 hover:bg-white/10 transition">Download</button>
-            <button id="modalPrint" class="px-3 py-2 border rounded text-sky-100 hover:bg-white/10 transition">Print</button>
-            <button id="modalClose" class="px-3 py-2 bg-red-600 rounded text-white hover:bg-red-700 transition">Close</button>
+            <button id="modalDownload" class="px-3 py-2 border rounded text-sky-100">Download</button>
+            <button id="modalPrint" class="px-3 py-2 border rounded text-sky-100">Print</button>
+            <button id="modalClose" class="px-3 py-2 bg-red-600 rounded text-white">Close</button>
           </div>
         </div>
         <div class="mt-4 max-h-[60vh] overflow-auto note-content" id="modalContent" style="padding-right:12px;"></div>
@@ -111,7 +118,34 @@
     </div>
   </div>
 
+  <!-- Demo PayFast modal -->
+  <div id="payfastModal" class="fixed inset-0 hidden items-center justify-center z-30">
+    <div class="absolute inset-0 bg-black/70"></div>
+    <div class="relative max-w-md w-full mx-4 bg-gradient-to-r from-sky-900 to-indigo-900 rounded-3xl p-8 glass shadow-2xl text-slate-100">
+      <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/PayFast_Logo.svg/1280px-PayFast_Logo.svg.png" alt="PayFast" class="w-20">
+        Demo Payment
+      </h2>
+      <form id="payfastForm" class="flex flex-col gap-4">
+        <input type="text" id="pfName" placeholder="Full Name" class="p-3 rounded bg-slate-800 placeholder-slate-400" required autocomplete="name" />
+        <input type="email" id="pfEmail" placeholder="Email Address" class="p-3 rounded bg-slate-800 placeholder-slate-400" required autocomplete="email" />
+        <input type="text" id="pfCard" placeholder="Card Number (fake)" class="p-3 rounded bg-slate-800 placeholder-slate-400" required pattern="\\d{13,19}" title="Enter 13 to 19 digits" autocomplete="cc-number" />
+        <div class="flex gap-4">
+          <input type="text" id="pfExpiry" placeholder="MM/YY" class="p-3 rounded bg-slate-800 placeholder-slate-400 flex-1" required pattern="(0[1-9]|1[0-2])\\/\\d{2}" title="Format MM/YY" autocomplete="cc-exp" />
+          <input type="text" id="pfCVV" placeholder="CVV" class="p-3 rounded bg-slate-800 placeholder-slate-400 w-24" required pattern="\\d{3,4}" title="3 or 4 digits" autocomplete="cc-csc" />
+        </div>
+        <div class="flex items-center justify-between mt-6">
+          <button type="button" id="pfCancel" class="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600 transition">Cancel</button>
+          <button type="submit" id="pfPay" class="px-4 py-2 bg-green-600 rounded hover:bg-green-700 flex items-center justify-center transition">
+            Pay <span id="pfSpinner" class="spinner hidden"></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
+  // Rain animation (canvas)
   (function() {
     const canvas = document.getElementById('rainCanvas');
     const ctx = canvas.getContext('2d');
@@ -165,6 +199,7 @@
     requestAnimationFrame(draw);
   })();
 
+  // Notes data
   const NOTES = {
     "mathematics": {
       title: "Mathematics (IGCSE / AS-A Level core concepts)",
@@ -324,175 +359,214 @@ Exam tips:
     }
   };
 
+  // Storage keys and helpers
   const STORAGE_KEY = 'caie_forest_unlocked_v1';
   function loadUnlocked() {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
     catch { return []; }
   }
   function saveUnlocked(arr) { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
-  function isUnlocked(k) { return loadUnlocked().includes(k); }
-  function unlock(k) { const arr = loadUnlocked(); if (!arr.includes(k)) { arr.push(k); saveUnlocked(arr); } }
-  function lockAll() { saveUnlocked([]); }
-  function unlockAll() { saveUnlocked(Object.keys(NOTES)); }
+  function isUnlocked(key) { return loadUnlocked().includes(key); }
+  function unlockSubject(key) {
+    const arr = loadUnlocked();
+    if (!arr.includes(key)) {
+      arr.push(key);
+      saveUnlocked(arr);
+    }
+  }
+  function lockAll() {
+    localStorage.removeItem(STORAGE_KEY);
+  }
 
+  // DOM refs
   const subjectsGrid = document.getElementById('subjectsGrid');
   const modal = document.getElementById('modal');
-  const modalBackdrop = document.getElementById('modalBackdrop');
   const modalTitle = document.getElementById('modalTitle');
   const modalContent = document.getElementById('modalContent');
   const modalClose = document.getElementById('modalClose');
   const modalDownload = document.getElementById('modalDownload');
   const modalPrint = document.getElementById('modalPrint');
+  const unlockAllBtn = document.getElementById('unlockAllBtn');
+  const exportAllBtn = document.getElementById('exportAllBtn');
 
+  // Payment modal refs
+  const payfastModal = document.getElementById('payfastModal');
+  const payfastForm = document.getElementById('payfastForm');
+  const pfName = document.getElementById('pfName');
+  const pfEmail = document.getElementById('pfEmail');
+  const pfCard = document.getElementById('pfCard');
+  const pfExpiry = document.getElementById('pfExpiry');
+  const pfCVV = document.getElementById('pfCVV');
+  const pfCancel = document.getElementById('pfCancel');
+  const pfPay = document.getElementById('pfPay');
+  const pfSpinner = document.getElementById('pfSpinner');
+
+  // Current subject for payment
+  let currentPaymentKey = null;
+
+  // Create subject card
   function createCard(key, data) {
     const unlocked = isUnlocked(key);
     const div = document.createElement('div');
     div.className = 'p-4 rounded-xl glass card-hover transition transform';
     div.innerHTML = `
       <div class="flex items-start justify-between gap-3">
-        <div class="flex-1 pr-4">
+        <div>
           <h4 class="text-lg font-semibold text-sky-100">${data.title}</h4>
-          <p class="text-sm text-slate-300 mt-2">${data.content.split('\\n')[0].slice(0,120)}...</p>
+          <p class="text-sm text-slate-300 mt-2">${data.content.split('\n')[0].slice(0,120)}...</p>
         </div>
-        <div class="text-right btn-group">
-          <div>
+        <div class="text-right">
+          <div class="mb-2">
             <span class="text-xs text-slate-300">Price</span>
             <div class="text-xl font-bold text-sky-200">$${data.price.toFixed(2)}</div>
           </div>
-          ${unlocked
-            ? `<button class="openBtn px-3 py-2 rounded-md border text-sky-100 hover:bg-white/10 transition">Open</button>
-               <button class="downloadBtn px-3 py-2 rounded-md border text-sky-100 hover:bg-white/10 transition">Download</button>`
-            : `<button class="unlockBtn px-3 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition">Unlock</button>`}
+          <div class="flex flex-col items-end gap-2">
+            ${
+              unlocked
+                ? `<button class="openBtn px-3 py-2 rounded-md border text-sky-100">Open</button>
+                   <button class="downloadBtn px-3 py-2 rounded-md border text-sky-100">Download</button>`
+                : `<button class="unlockBtn px-3 py-2 rounded-md bg-indigo-600 text-white">Unlock</button>`
+            }
+          </div>
         </div>
       </div>
     `;
-    setTimeout(() => {
-      const unlockBtn = div.querySelector('.unlockBtn');
-      const openBtn = div.querySelector('.openBtn');
-      const downloadBtn = div.querySelector('.downloadBtn');
-      if (unlockBtn) unlockBtn.addEventListener('click', () => handleUnlock(key));
-      if (openBtn) openBtn.addEventListener('click', () => openModal(key));
-      if (downloadBtn) downloadBtn.addEventListener('click', () => downloadSubject(key));
-    }, 0);
+    // Attach event listeners immediately:
+    const unlockBtn = div.querySelector('.unlockBtn');
+    const openBtn = div.querySelector('.openBtn');
+    const downloadBtn = div.querySelector('.downloadBtn');
+    if (unlockBtn) unlockBtn.addEventListener('click', () => handleUnlock(key));
+    if (openBtn) openBtn.addEventListener('click', () => openModal(key));
+    if (downloadBtn) downloadBtn.addEventListener('click', () => downloadSubject(key));
     return div;
   }
 
-  function renderAllCards() {
+  // Render all subjects
+  function renderSubjects() {
     subjectsGrid.innerHTML = '';
-    Object.entries(NOTES).forEach(([key, data]) => {
+    for (const [key, data] of Object.entries(NOTES)) {
       subjectsGrid.appendChild(createCard(key, data));
-    });
+    }
   }
 
-  // Modal open/close & content
-  let currentKey = null;
+  // Open notes modal
   function openModal(key) {
-    currentKey = key;
     modalTitle.textContent = NOTES[key].title;
     modalContent.textContent = NOTES[key].content;
     modal.classList.remove('hidden');
-    modal.focus();
   }
-  function closeModal() {
+  modalClose.addEventListener('click', () => {
     modal.classList.add('hidden');
-    currentKey = null;
-  }
+  });
+  document.getElementById('modalBackdrop').addEventListener('click', () => {
+    modal.classList.add('hidden');
+  });
 
-  modalClose.addEventListener('click', closeModal);
-  modalBackdrop.addEventListener('click', closeModal);
-
-  // Download text as .txt file
+  // Download notes as .txt
   function downloadSubject(key) {
     const data = NOTES[key];
-    const blob = new Blob([data.title + "\n\n" + data.content], {type: 'text/plain'});
+    const filename = `${data.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`;
+    const blob = new Blob([data.content], {type: 'text/plain'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${key}_notes.txt`;
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
   }
 
-  modalDownload.addEventListener('click', () => {
-    if (currentKey) downloadSubject(currentKey);
+  // Handle unlock button click: open payment modal
+  function handleUnlock(key) {
+    currentPaymentKey = key;
+    payfastForm.reset();
+    pfPay.disabled = false;
+    pfSpinner.classList.add('hidden');
+    payfastModal.classList.remove('hidden');
+    pfName.focus();
+  }
+
+  // Payment form submission (demo)
+  payfastForm.addEventListener('submit', e => {
+    e.preventDefault();
+    pfPay.disabled = true;
+    pfSpinner.classList.remove('hidden');
+
+    // Simple "processing" simulation 2s delay
+    setTimeout(() => {
+      // Unlock subject
+      unlockSubject(currentPaymentKey);
+      renderSubjects();
+      payfastModal.classList.add('hidden');
+      alert(`Payment successful! Notes for "${NOTES[currentPaymentKey].title}" are now unlocked.`);
+    }, 2000);
   });
 
+  pfCancel.addEventListener('click', () => {
+    payfastModal.classList.add('hidden');
+  });
+
+  // Unlock all button (demo)
+  unlockAllBtn.addEventListener('click', () => {
+    for (const key of Object.keys(NOTES)) {
+      unlockSubject(key);
+    }
+    renderSubjects();
+    alert('All subjects unlocked!');
+  });
+
+  // Download all notes as zipped txt files (simple zip download skipped here, downloads one by one)
+  exportAllBtn.addEventListener('click', () => {
+    if(!confirm("This will download all notes as separate .txt files, one by one. Continue?")) return;
+    for (const key of Object.keys(NOTES)) {
+      downloadSubject(key);
+    }
+  });
+
+  // Demo lock all shortcut (Shift+L)
+  document.addEventListener('keydown', e => {
+    if(e.shiftKey && e.key.toLowerCase() === 'l') {
+      if(confirm('Clear all unlocked notes?')) {
+        lockAll();
+        renderSubjects();
+        alert('All notes locked.');
+      }
+    }
+  });
+
+  // Demo lock all button
+  document.getElementById('demoLockBtn').addEventListener('click', () => {
+    if(confirm('Clear all unlocked notes?')) {
+      lockAll();
+      renderSubjects();
+      alert('All notes locked.');
+    }
+  });
+
+  // Demo info alert
+  document.getElementById('demoInfoBtn').addEventListener('click', () => {
+    alert(`This website demo includes syllabus-aligned notes for CAIE subjects. Unlock notes by simulating a payment via the demo PayFast modal. All payment data stays local, no real payments.\n\nNotes updated: Aug 2025.`);
+  });
+
+  // Modal download and print buttons
+  modalDownload.addEventListener('click', () => {
+    // Use current modal title to find key
+    const key = Object.keys(NOTES).find(k => NOTES[k].title === modalTitle.textContent);
+    if(key) downloadSubject(key);
+  });
   modalPrint.addEventListener('click', () => {
-    if (!currentKey) return;
-    const printWindow = window.open('', '', 'width=800,height=600');
-    printWindow.document.write(`<pre style="font-family: monospace; white-space: pre-wrap; padding: 1em;">${NOTES[currentKey].title}\n\n${NOTES[currentKey].content}</pre>`);
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`<pre style="font-family: ui-monospace, monospace; white-space: pre-wrap; padding: 1rem;">${modalContent.textContent}</pre>`);
     printWindow.document.close();
     printWindow.focus();
     printWindow.print();
   });
 
-  // Demo PayFast integration (opens payment URL in new tab for demo only)
-  const PAYFAST = {
-    merchant_id: '10000100', // demo merchant id
-    merchant_key: '46f0cd694581a', // demo merchant key
-    return_url: window.location.origin + '/payment-success.html',
-    cancel_url: window.location.origin + '/payment-cancel.html',
-    notify_url: window.location.origin + '/ipn-listener'
-  };
-
-  function generatePayFastUrl(item_name, amount) {
-    const params = new URLSearchParams({
-      merchant_id: PAYFAST.merchant_id,
-      merchant_key: PAYFAST.merchant_key,
-      return_url: PAYFAST.return_url,
-      cancel_url: PAYFAST.cancel_url,
-      notify_url: PAYFAST.notify_url,
-      amount: amount.toFixed(2),
-      item_name
-    });
-    return 'https://www.payfast.co.za/eng/process?' + params.toString();
-  }
-
-  function handleUnlock(key) {
-    if (isUnlocked(key)) {
-      alert("Already unlocked!");
-      return;
-    }
-    const subject = NOTES[key];
-    const payUrl = generatePayFastUrl(subject.title, subject.price);
-    // Open PayFast payment page URL in new tab (demo)
-    window.open(payUrl, '_blank');
-  }
-
-  document.getElementById('unlockAllBtn').addEventListener('click', () => {
-    alert('Unlock All feature is disabled in demo.');
-  });
-
-  document.getElementById('exportAllBtn').addEventListener('click', () => {
-    alert('Download All feature is disabled in demo.');
-  });
-
-  document.getElementById('demoLockBtn').addEventListener('click', () => {
-    if (confirm("Lock all unlocked subjects?")) {
-      lockAll();
-      alert("All subjects locked.");
-      renderAllCards();
-    }
-  });
-
-  document.getElementById('demoInfoBtn').addEventListener('click', () => {
-    alert("This demo site shows CAIE notes. Clicking Unlock opens a simulated PayFast payment page URL in a new tab.");
-  });
-
-  // Keyboard shortcut: Shift + L to lock all
-  window.addEventListener('keydown', (e) => {
-    if (e.shiftKey && (e.key === 'L' || e.key === 'l')) {
-      e.preventDefault();
-      if (confirm("Lock all unlocked subjects?")) {
-        lockAll();
-        alert("All subjects locked.");
-        renderAllCards();
-      }
-    }
-  });
-
-  renderAllCards();
+  // Show current year
   document.getElementById('year').textContent = new Date().getFullYear();
+
+  // Initial render
+  renderSubjects();
+
   </script>
 </body>
 </html>
