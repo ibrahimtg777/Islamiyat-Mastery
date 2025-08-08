@@ -1,143 +1,284 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Islamiyat Notes - Rain Forest Theme</title>
-<style>
-  body, html {
-    margin: 0; padding: 0;
-    font-family: Arial, sans-serif;
-    color: white;
-    height: 100%;
-    overflow-x: hidden;
-  }
-  video#bgVideo {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    object-fit: cover;
-    z-index: -2;
-  }
-  .overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5);
-    z-index: -1;
-  }
-  header {
-    background: rgba(0,0,0,0.6);
-    padding: 20px;
-    text-align: center;
-    font-size: 1.5rem;
-    font-weight: bold;
-    border-bottom: 2px solid #4cafef;
-  }
-  .container {
-    max-width: 800px;
-    margin: auto;
-    padding: 20px;
-  }
-  .card {
-    background: rgba(0,0,0,0.7);
-    margin-bottom: 10px;
-    border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid #4cafef;
-  }
-  .card-header {
-    padding: 15px;
-    cursor: pointer;
-    font-weight: bold;
-    background: rgba(0,0,0,0.8);
-  }
-  .card-content {
-    display: none;
-    padding: 15px;
-    background: rgba(0,0,0,0.5);
-    font-size: 0.95rem;
-    line-height: 1.6;
-  }
-  .payfast-btn {
-    display: inline-block;
-    background: #4cafef;
-    padding: 10px 20px;
-    margin-top: 10px;
-    text-decoration: none;
-    color: white;
-    font-weight: bold;
-    border-radius: 5px;
-  }
-  .audio-toggle {
-    margin-top: 10px;
-    padding: 6px 12px;
-    background: #ff9800;
-    border: none;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Islamiyat Notes - Rainforest Theme</title>
+  <style>
+    /* Reset & basics */
+    * {
+      box-sizing: border-box;
+    }
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #000;
+      color: #e0e0e0;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Background Video */
+    #bgVideo {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: -2;
+      filter: brightness(0.5) contrast(1.2);
+    }
+    /* Dark overlay */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: -1;
+      backdrop-filter: brightness(0.7);
+    }
+
+    /* Header */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0,0,0,0.7);
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #4cafef;
+      z-index: 10;
+      user-select: none;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      color: #4cafef;
+      font-weight: 700;
+    }
+
+    /* Buttons container */
+    .header-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    /* PayFast Button */
+    .payfast-btn {
+      background: #4cafef;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 6px;
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+    }
+    .payfast-btn:hover {
+      background: #1e88e5;
+    }
+
+    /* Thunder toggle */
+    .audio-toggle {
+      background: #ff9800;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 6px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .audio-toggle:hover {
+      background: #fb8c00;
+    }
+
+    /* Container */
+    .container {
+      max-width: 800px;
+      margin: 100px auto 40px;
+      padding: 0 20px;
+      user-select: text;
+    }
+
+    /* Glassmorphism Card */
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      backdrop-filter: blur(8.5px);
+      -webkit-backdrop-filter: blur(8.5px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      overflow: hidden;
+      transition: transform 0.3s ease;
+    }
+    .card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 12px 40px rgba(31, 38, 135, 0.5);
+    }
+
+    /* Card Header */
+    .card-header {
+      padding: 18px 24px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #81d4fa;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Arrow Icon */
+    .arrow {
+      display: inline-block;
+      transition: transform 0.3s ease;
+      font-weight: 700;
+      font-size: 1.2rem;
+      user-select: none;
+    }
+    .arrow.open {
+      transform: rotate(90deg);
+    }
+
+    /* Card Content */
+    .card-content {
+      padding: 0 24px 20px 24px;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #d0d0d0;
+      display: none;
+      user-select: text;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .card-header {
+        font-size: 1.1rem;
+      }
+      header h1 {
+        font-size: 1.2rem;
+      }
+      .payfast-btn, .audio-toggle {
+        font-size: 0.9rem;
+        padding: 8px 12px;
+      }
+    }
+  </style>
 </head>
 <body>
 
-<!-- Background Video -->
-<video id="bgVideo" autoplay muted loop playsinline>
-  <source src="https://cdn.pixabay.com/video/2019/08/16/26547-356497887_large.mp4" type="video/mp4" />
-</video>
-<div class="overlay"></div>
+  <!-- Background Video -->
+  <video id="bgVideo" autoplay muted loop playsinline>
+    <source src="https://cdn.pixabay.com/video/2019/08/16/26547-356497887_large.mp4" type="video/mp4" />
+    Sorry, your browser does not support the video tag.
+  </video>
+  <div class="overlay"></div>
 
-<!-- Thunder Audio -->
-<audio id="thunderAudio" loop>
-  <source src="https://cdn.pixabay.com/download/audio/2023/03/14/audio_aee6e4f845.mp3?filename=thunderstorm-ambient-14538.mp3" type="audio/mpeg" />
-</audio>
+  <!-- Thunder Audio -->
+  <audio id="thunderAudio" loop>
+    <source src="https://cdn.pixabay.com/download/audio/2023/03/14/audio_aee6e4f845.mp3?filename=thunderstorm-ambient-14538.mp3" type="audio/mpeg" />
+    Sorry, your browser does not support the audio element.
+  </audio>
 
-<!-- Header -->
-<header>
-  Islamiyat Notes - CIE
-  <br />
-  <a href="https://sandbox.payfast.co.za/eng/process?merchant_id=10000100&merchant_key=46f0cd694581a&amount=6.99&item_name=Premium%20Islamiyat%20Notes&return_url=https://example.com&cancel_url=https://example.com" 
-    class="payfast-btn" target="_blank" rel="noopener noreferrer">PayFast Demo - $6.99</a>
-  <button class="audio-toggle" onclick="toggleAudio()">Toggle Thunder</button>
-</header>
-
-<!-- Notes Container -->
-<div class="container">
-  <div class="card">
-    <div class="card-header" onclick="toggleCard(this)">Chapter 1: Early Life of the Prophet (PBUH)</div>
-    <div class="card-content">
-      <p>The Prophet Muhammad (PBUH) was born in 570 CE in Makkah. His father, Abdullah, died before his birth, and his mother Amina passed away when he was six. He was raised by his grandfather Abdul Muttalib and later his uncle Abu Talib...</p>
+  <!-- Header -->
+  <header>
+    <h1>Islamiyat Notes - CIE</h1>
+    <div class="header-buttons">
+      <a
+        href="https://sandbox.payfast.co.za/eng/process?merchant_id=10000100&merchant_key=46f0cd694581a&amount=6.99&item_name=Premium%20Islamiyat%20Notes&return_url=https://example.com&cancel_url=https://example.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="payfast-btn"
+        >PayFast Demo - $6.99</a
+      >
+      <button class="audio-toggle" onclick="toggleAudio()">Toggle Thunder</button>
     </div>
-  </div>
-  <div class="card">
-    <div class="card-header" onclick="toggleCard(this)">Chapter 2: Prophethood and Revelation</div>
-    <div class="card-content">
-      <p>At the age of 40, Muhammad (PBUH) received his first revelation in the Cave of Hira through Angel Jibreel (Gabriel). This marked the beginning of his mission to spread Islam...</p>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-header" onclick="toggleCard(this)">Chapter 3: Migration to Madinah</div>
-    <div class="card-content">
-      <p>The migration (Hijrah) to Madinah in 622 CE was a turning point in Islamic history. It led to the establishment of the first Muslim community and state...</p>
-    </div>
-  </div>
-</div>
+  </header>
 
-<script>
-  function toggleCard(header) {
-    const content = header.nextElementSibling;
-    content.style.display = content.style.display === 'block' ? 'none' : 'block';
-  }
-  function toggleAudio() {
-    const audio = document.getElementById('thunderAudio');
-    if (audio.paused) {
-      audio.play();
-    } else {
-      audio.pause();
+  <!-- Notes Container -->
+  <main class="container">
+    <section class="card">
+      <div class="card-header" onclick="toggleCard(this)">
+        Chapter 1: Early Life of the Prophet (PBUH)
+        <span class="arrow">&#9654;</span>
+      </div>
+      <div class="card-content">
+        <p>
+          The Prophet Muhammad (PBUH) was born in 570 CE in Makkah. His father,
+          Abdullah, died before his birth, and his mother Amina passed away when
+          he was six. He was raised by his grandfather Abdul Muttalib and later
+          his uncle Abu Talib...
+        </p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header" onclick="toggleCard(this)">
+        Chapter 2: Prophethood and Revelation
+        <span class="arrow">&#9654;</span>
+      </div>
+      <div class="card-content">
+        <p>
+          At the age of 40, Muhammad (PBUH) received his first revelation in the
+          Cave of Hira through Angel Jibreel (Gabriel). This marked the beginning
+          of his mission to spread Islam...
+        </p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header" onclick="toggleCard(this)">
+        Chapter 3: Migration to Madinah
+        <span class="arrow">&#9654;</span>
+      </div>
+      <div class="card-content">
+        <p>
+          The migration (Hijrah) to Madinah in 622 CE was a turning point in
+          Islamic history. It led to the establishment of the first Muslim
+          community and state...
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Toggle chapter open/close
+    function toggleCard(header) {
+      const content = header.nextElementSibling;
+      const arrow = header.querySelector('.arrow');
+      if (content.style.display === 'block') {
+        content.style.display = 'none';
+        arrow.classList.remove('open');
+      } else {
+        content.style.display = 'block';
+        arrow.classList.add('open');
+      }
     }
-  }
-</script>
 
+    // Toggle thunder audio
+    function toggleAudio() {
+      const audio = document.getElementById('thunderAudio');
+      if (audio.paused) {
+        audio.play();
+      } else {
+        audio.pause();
+      }
+    }
+  </script>
 </body>
 </html>
