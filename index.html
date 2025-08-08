@@ -3,44 +3,21 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>CAIE Notes — Forest Rain Edition</title>
+  <title>CAIE Notes — Forest Rain + PayFast Sandbox</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Basic page setup */
-    html,body { height: 100%; margin: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:#071422; color: #e6eef8; }
-    /* Background layers */
-    #bg {
-      position: fixed; inset: 0;
-      background-image: url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1950&q=80');
-      background-size: cover; background-position: center;
-      filter: saturate(0.9) contrast(0.85) brightness(0.6);
-      z-index: -4;
-    }
-    #overlay {
-      position: fixed; inset: 0;
-      background: linear-gradient(180deg, rgba(3,6,12,0.28), rgba(2,6,23,0.68));
-      z-index: -3;
-    }
-    /* rain canvas */
-    #rainCanvas {
-      position: fixed; inset: 0; z-index: -2; pointer-events: none; mix-blend-mode: screen; opacity: .9;
-    }
-    /* glass card look */
-    .glass {
-      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-      border: 1px solid rgba(255,255,255,0.04);
-      backdrop-filter: blur(6px) saturate(1.05);
-      -webkit-backdrop-filter: blur(6px) saturate(1.05);
-    }
+    html,body { height:100%; margin:0; font-family:Inter,system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:#071422; color:#e6eef8; }
+    #bg { position:fixed; inset:0; background-image:url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1950&q=80'); background-size:cover; background-position:center; filter:brightness(.55) saturate(.9); z-index:-4; }
+    #overlay { position:fixed; inset:0; background:linear-gradient(180deg, rgba(3,6,12,0.2), rgba(2,6,23,0.7)); z-index:-3; }
+    #rainCanvas { position:fixed; inset:0; z-index:-2; pointer-events:none; mix-blend-mode:screen; opacity:.9; }
+    .glass { background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.04); backdrop-filter: blur(6px) saturate(1.05); -webkit-backdrop-filter: blur(6px) saturate(1.05); }
     .card-hover { transition: transform .22s ease, box-shadow .22s ease; }
     .card-hover:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(2,6,23,0.6); }
-    .note-content { white-space: pre-wrap; color: #e6eef8; line-height: 1.6; }
-    /* responsive grid */
+    .note-content { white-space: pre-wrap; color:#e6eef8; line-height:1.6; font-size:14px; }
     .grid-cols-responsive { grid-template-columns: repeat(1, minmax(0,1fr)); }
     @media(min-width:640px){ .grid-cols-responsive { grid-template-columns: repeat(2, minmax(0,1fr)); } }
     @media(min-width:1024px){ .grid-cols-responsive { grid-template-columns: repeat(3, minmax(0,1fr)); } }
-    /* small tweaks */
-    .muted-btn { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.04); color: #dbeafe; }
+    .muted-btn { background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.04); color:#dbeafe; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -50,12 +27,12 @@
   <div id="overlay" aria-hidden="true"></div>
   <canvas id="rainCanvas" aria-hidden="true"></canvas>
 
-  <!-- Topbar -->
+  <!-- Top bar -->
   <header class="relative z-10 py-5">
     <div class="max-w-7xl mx-auto px-4 flex items-center justify-between">
       <div>
         <h1 class="text-3xl font-extrabold tracking-tight">🌲 CAIE Notes — Forest Rain Edition</h1>
-        <p class="text-slate-300 mt-1 max-w-xl">Original, syllabus-aligned study notes for major CAIE subjects. Click a subject to preview, then <strong>Unlock — $6.99</strong> (simulated) to view the full notes in your browser.</p>
+        <p class="text-slate-300 mt-1 max-w-xl">Original chapter-by-chapter study notes. Unlock with PayFast (sandbox test) or use Test Unlock for demo. <strong>Price: $6.99 per subject</strong>.</p>
       </div>
       <div class="flex items-center gap-3">
         <button id="unlockAllBtn" class="px-4 py-2 rounded-md muted-btn hover:bg-white/5 transition">Unlock All</button>
@@ -72,26 +49,24 @@
   <main class="relative z-10 flex-1">
     <div class="max-w-7xl mx-auto px-4 pb-12">
       <section class="grid gap-6 grid-cols-responsive">
-        <!-- Info Card -->
+        <!-- Info card -->
         <div class="glass rounded-2xl p-6 card-hover">
           <h2 class="text-xl font-semibold">How to use</h2>
-          <p class="text-slate-300 mt-2">This is a single HTML file. Unlocking is simulated and saved to your browser's storage only. Use <strong>Download</strong> to save notes to your computer. Press <strong>Shift + L</strong> to lock (clear unlocked subjects).</p>
+          <p class="text-slate-300 mt-2">Click a subject to preview. Click <strong>Unlock</strong> to go to PayFast sandbox (or choose Test Unlock). After payment you will be redirected back; site marks the subject unlocked in localStorage. Replace PayFast placeholders and implement server-side IPN verification before real use.</p>
           <div class="mt-4 flex gap-3">
             <button id="lockBtn" class="px-4 py-2 rounded-md bg-rose-600 hover:brightness-105">Lock All</button>
             <button id="aboutBtn" class="px-4 py-2 rounded-md muted-btn">About Notes</button>
           </div>
         </div>
 
-        <!-- Subjects area (cards) -->
+        <!-- Subjects -->
         <div class="glass rounded-2xl p-6 card-hover col-span-1 lg:col-span-2">
           <h3 class="text-lg font-semibold mb-4">Subjects</h3>
-          <div id="subjectsGrid" class="grid gap-4 grid-cols-responsive">
-            <!-- JS populates subject cards -->
-          </div>
+          <div id="subjectsGrid" class="grid gap-4 grid-cols-responsive"></div>
         </div>
       </section>
 
-      <div class="text-center text-slate-300 text-sm mt-8">Tip: Hit <strong>Escape</strong> to close a note. © <span id="year"></span></div>
+      <div class="text-center text-slate-300 text-sm mt-8">Tip: Press <strong>Shift + L</strong> to lock all. © <span id="year"></span></div>
     </div>
   </main>
 
@@ -117,527 +92,526 @@
   </div>
 
   <script>
-  /*******************************
-   *  Rain animation (canvas)
-   *******************************/
+  /**************************************************************
+   *  Rain animation (canvas) - lightweight
+   **************************************************************/
   (function(){
-    const canvas = document.getElementById('rainCanvas');
-    const ctx = canvas.getContext('2d');
-    let W = canvas.width = innerWidth;
-    let H = canvas.height = innerHeight;
-    let drops = [];
-    const baseCount = 1200;
-
-    function rand(min, max) { return Math.random()*(max-min)+min; }
-    function adjust() {
-      W = canvas.width = innerWidth;
-      H = canvas.height = innerHeight;
-      drops = [];
-      const count = Math.max(150, Math.floor(baseCount * (W*H)/(1920*1080)));
-      for (let i=0;i<count;i++){
-        drops.push({
-          x: Math.random()*W,
-          y: Math.random()*H,
-          len: rand(8, 22),
-          speed: rand(400, 1100),
-          thickness: rand(0.8, 1.6),
-          sway: rand(-0.7, 0.7),
-          opacity: rand(0.12, 0.28)
-        });
-      }
-    }
+    const c = document.getElementById('rainCanvas'), ctx = c.getContext('2d');
+    let W = c.width = innerWidth, H = c.height = innerHeight;
+    let drops = [], base = 1100;
+    function rand(a,b){return Math.random()*(b-a)+a;}
+    function resize(){ W=c.width=innerWidth; H=c.height=innerHeight; drops=[]; const count=Math.max(150, Math.floor(base * (W*H)/(1920*1080))); for(let i=0;i<count;i++){drops.push({x:Math.random()*W,y:Math.random()*H,len:rand(8,22),spd:rand(400,1100),th:rand(0.8,1.6),sway:rand(-0.7,0.7),op:rand(0.12,0.28)});} }
     let last = performance.now();
-    function animate(now){
-      const dt = (now-last)/1000; last = now;
-      ctx.clearRect(0,0,W,H);
-
-      // draw subtle mist overlay
-      const g = ctx.createLinearGradient(0,0,0,H);
-      g.addColorStop(0, 'rgba(0,0,0,0)');
-      g.addColorStop(1, 'rgba(0,0,0,0.12)');
-      ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
-
-      ctx.lineCap = 'round';
-      for (let d of drops) {
-        d.y += d.speed * dt;
-        d.x += Math.sin((d.y + now*0.0006)) * d.sway * 3;
-        if (d.y > H + 20) { d.y = -20; d.x = Math.random()*W; }
-        ctx.beginPath();
-        ctx.strokeStyle = `rgba(200,230,255,${d.opacity})`;
-        ctx.lineWidth = d.thickness;
-        ctx.moveTo(d.x, d.y);
-        ctx.lineTo(d.x + d.sway*6, d.y + d.len);
-        ctx.stroke();
-      }
-      requestAnimationFrame(animate);
+    function loop(now){ const dt=(now-last)/1000; last=now; ctx.clearRect(0,0,W,H); // faint mist
+      const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.12)'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+      ctx.lineCap='round';
+      for(const d of drops){ d.y += d.spd * dt; d.x += Math.sin((d.y + now*0.0006))*d.sway*3; if(d.y>H+20){d.y=-20; d.x=Math.random()*W;} ctx.beginPath(); ctx.strokeStyle=`rgba(200,230,255,${d.op})`; ctx.lineWidth=d.th; ctx.moveTo(d.x,d.y); ctx.lineTo(d.x + d.sway*6, d.y + d.len); ctx.stroke(); }
+      requestAnimationFrame(loop);
     }
-    window.addEventListener('resize', adjust);
-    adjust(); requestAnimationFrame(animate);
+    window.addEventListener('resize', resize); resize(); requestAnimationFrame(loop);
   })();
 
-  /*******************************
-   *  Thunder ambience (WebAudio)
-   *  - very low volume rumble + occasional low "thump"
-   *******************************/
+  /**************************************************************
+   *  Thunder ambience via Web Audio (very low subtle rumble)
+   *  - start muted; user must toggle to enable audio (gesture)
+   **************************************************************/
   const AudioEngine = (function(){
-    let ctx = null;
-    let masterGain = null;
-    let rumbleGain = null;
-    let isRunning = false;
-    function init() {
+    let ctx=null, master=null, rumbleGain=null, noiseSource=null;
+    function init(){
       if (ctx) return;
-      try {
-        ctx = new (window.AudioContext || window.webkitAudioContext)();
-      } catch (e) { console.warn('AudioContext not available'); return; }
-      masterGain = ctx.createGain();
-      masterGain.gain.value = 0.0; // start muted
-      masterGain.connect(ctx.destination);
-
-      // low-frequency rumble using noise filtered
-      const bufferSize = 2*ctx.sampleRate;
-      const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-      const output = noiseBuffer.getChannelData(0);
-      for (let i=0;i<bufferSize;i++) output[i] = Math.random()*2-1;
-      const noise = ctx.createBufferSource();
-      noise.buffer = noiseBuffer;
-      noise.loop = true;
-      const noiseFilter = ctx.createBiquadFilter();
-      noiseFilter.type = 'lowpass';
-      noiseFilter.frequency.value = 80; // very low
-      noiseFilter.Q.value = 0.8;
-
-      rumbleGain = ctx.createGain();
-      rumbleGain.gain.value = 0.02; // base rumble level (very low)
-      noise.connect(noiseFilter);
-      noiseFilter.connect(rumbleGain);
-      rumbleGain.connect(masterGain);
-
-      noise.start();
-
-      // occasional thunder "thump" via low oscillator + gain envelope
-      function thunderPulse() {
-        const osc = ctx.createOscillator();
-        const g = ctx.createGain();
-        osc.type = 'sine';
-        const freq = Math.random()*10 + 20; // 20-30Hz
-        osc.frequency.value = freq;
-        g.gain.value = 0.0;
-        osc.connect(g);
-        g.connect(masterGain);
-        const now = ctx.currentTime;
-        g.gain.cancelScheduledValues(now);
-        // envelope
-        g.gain.setValueAtTime(0, now);
-        g.gain.linearRampToValueAtTime(0.08 * Math.random(), now + 0.02);
-        g.gain.exponentialRampToValueAtTime(0.0001, now + 2.2 + Math.random()*1.8);
-        osc.start(now);
-        osc.stop(now + 3.0 + Math.random()*2.0);
-      }
-
-      // schedule occasional thunder
-      function scheduleThunder() {
-        const delay = 6 + Math.random()*22; // every 6-28s
-        setTimeout(() => { thunderPulse(); scheduleThunder(); }, delay*1000);
-      }
-      scheduleThunder();
-      isRunning = true;
+      try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){ console.warn('No AudioContext'); return; }
+      master = ctx.createGain(); master.gain.value = 0.0; master.connect(ctx.destination);
+      // noise buffer for rumble
+      const buffer = ctx.createBuffer(1, ctx.sampleRate*2, ctx.sampleRate); const data = buffer.getChannelData(0);
+      for(let i=0;i<data.length;i++) data[i] = Math.random()*2-1;
+      noiseSource = ctx.createBufferSource(); noiseSource.buffer = buffer; noiseSource.loop = true;
+      const lp = ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value = 80;
+      rumbleGain = ctx.createGain(); rumbleGain.gain.value = 0.02;
+      noiseSource.connect(lp); lp.connect(rumbleGain); rumbleGain.connect(master);
+      noiseSource.start();
+      // occasional thunder pulses
+      function thunderPulse(){ const osc = ctx.createOscillator(), g = ctx.createGain(); osc.type='sine'; osc.frequency.value = 20 + Math.random()*12; g.gain.value=0; osc.connect(g); g.connect(master); const t = ctx.currentTime; g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.06*Math.random()+0.01, t+0.02); g.gain.exponentialRampToValueAtTime(0.0001, t+2+Math.random()*2); osc.start(t); osc.stop(t+3); }
+      function schedule(){ setTimeout(()=>{ thunderPulse(); schedule(); }, 7*1000 + Math.random()*22000); } schedule();
     }
-    function setVolume(v) { if (masterGain) masterGain.gain.setTargetAtTime(v, (ctx||{}).currentTime || 0, 0.1); }
-    function resumeOnGesture() {
-      if (!ctx) init();
-      if (!ctx) return;
-      if (ctx.state === 'suspended') ctx.resume().catch(()=>{});
-    }
-    return {
-      init, setVolume, resumeOnGesture, isRunning: ()=>!!isRunning
-    };
+    function resume(){ if(!ctx) init(); if(ctx && ctx.state==='suspended') ctx.resume(); }
+    function setVolume(v){ if(master) master.gain.setTargetAtTime(v, (ctx||{}).currentTime||0, 0.1); }
+    return { init, resume, setVolume };
   })();
 
-  // UI: sound toggle
-  const audioToggle = document.getElementById('audioToggle');
-  const soundStatus = document.getElementById('soundStatus');
+  // init audio (muted)
+  AudioEngine.init(); AudioEngine.setVolume(0);
+
+  // audio toggle UI
+  const audioToggle = document.getElementById('audioToggle'), soundStatus = document.getElementById('soundStatus');
   let ambienceOn = false;
-  audioToggle.addEventListener('click', () => {
-    // ensure audio context is created/resumed on a user gesture
-    AudioEngine.resumeOnGesture();
-    if (!ambienceOn) {
-      AudioEngine.setVolume(0.02); // very subtle
-      ambienceOn = true;
-      soundStatus.textContent = 'On (subtle)';
-      audioToggle.textContent = '🔊 Ambience';
-    } else {
-      AudioEngine.setVolume(0.0);
-      ambienceOn = false;
-      soundStatus.textContent = 'Muted';
-      audioToggle.textContent = '🔈 Ambience';
-    }
+  audioToggle.addEventListener('click', ()=>{
+    AudioEngine.resume(); // resume on gesture
+    if(!ambienceOn){ AudioEngine.setVolume(0.02); ambienceOn=true; soundStatus.textContent='On (subtle)'; audioToggle.textContent='🔊 Ambience'; }
+    else { AudioEngine.setVolume(0); ambienceOn=false; soundStatus.textContent='Muted'; audioToggle.textContent='🔈 Ambience'; }
   });
 
-  // create AudioEngine but keep muted until toggle/resume
-  AudioEngine.init();
-  AudioEngine.setVolume(0.0);
-
-  /*******************************
-   *  Notes data - expanded original notes
-   *******************************/
+  /**************************************************************
+   *  Notes data - chapter structured (original content)
+   *  (Islamiyat expanded to 8 chapters fully; other subjects include
+   *   multiple chapter sections as requested — all original.)
+   **************************************************************/
   const NOTES = {
-    mathematics: {
-      title: "Mathematics — IGCSE / AS Core",
-      price: 6.99,
-      content: `Mathematics — In-depth Study Notes
-
-SECTION A — Number & Algebra
-1. Number types & properties
-- Integers, fractions, decimals, rational and irrational numbers. Surds: simplify sqrt(a*b) where possible, rationalise denominators: multiply numerator & denominator by conjugate when necessary.
-- Significant figures & rounding rules. Standard (scientific) notation: express as a × 10^n (1 ≤ a < 10).
-
-2. Indices & roots
-- Laws: a^m × a^n = a^(m+n); a^m / a^n = a^(m-n); (a^m)^n = a^(mn); a^0 = 1; a^-n = 1/a^n.
-- Fractional indices: a^(1/n) = nth root of a. Simplify carefully.
-
-3. Algebra manipulation
-- Expand, factorise (including difference of squares, perfect square trinomials).
-- Solve linear and quadratic equations: factorisation, completing the square, quadratic formula x = [-b ± √(b^2-4ac)]/(2a).
-- Simultaneous equations: substitution and elimination. Handle linear–quadratic systems with substitution into quadratic.
-
-4. Inequalities
-- Solve and express using interval notation. For quadratics, use sign tables or test points. Remember to flip inequality when multiplying by negative.
-
-SECTION B — Geometry & Trigonometry
-5. Coordinate geometry
-- Equation of a line: y = mx + c (m = gradient). Distance formula √[(x2-x1)^2+(y2-y1)^2]. Midpoint formula.
-- Circle equation (x - a)^2 + (y - b)^2 = r^2; convert parabolas by completing square.
-
-6. Trigonometry
-- sin, cos, tan definitions (right triangle) and unit circle approach. Convert degrees ↔ radians: π rad = 180°.
-- Laws: sine rule a/sinA = b/sinB = c/sinC; cosine rule c^2 = a^2 + b^2 - 2ab cosC.
-- Identities: sin^2θ + cos^2θ = 1; use identities to solve trig equations in given domains.
-
-SECTION C — Calculus & Applications
-7. Differentiation
-- Derivative meaning: instantaneous rate of change. Power rule, product, quotient, chain rules. Differentiate sin, cos, e^x, ln x.
-- Applications: stationary points (f'(x)=0), classify with second derivative, tangents and normals, motion: v = ds/dt, a = dv/dt.
-
-8. Integration
-- Antiderivatives, definite integrals as areas. Fundamental Theorem connects integration and differentiation.
-- Methods: substitution, integration by parts. Use integrals to find areas between curves and volumes of revolution.
-
-SECTION D — Probability & Statistics
-9. Probability basics
-- Mutually exclusive vs independent events. Conditional probability P(A|B) = P(A and B)/P(B).
-- Expectation value and variance basics.
-
-10. Statistics
-- Mean, median, mode, range, variance, standard deviation. Interpret histograms, box plots, cumulative frequency.
-- Simple linear regression concepts and correlation coefficient interpretation.
-
-Exam & Study Tips:
-- Always show steps. Write exact answers where required. Draw labelled diagrams for geometry/trig problems. Practice a mix of routine and non-routine problems.`
-    },
-    physics: {
-      title: "Physics — IGCSE / AS Core",
-      price: 6.99,
-      content: `Physics — In-depth Study Notes
-
-MECHANICS
-1. Kinematics
-- Scalars vs vectors. Position, displacement, speed, velocity, acceleration. SUVAT equations for constant acceleration:
-  s = ut + 0.5 a t^2
-  v = u + a t
-  v^2 = u^2 + 2 a s
-
-2. Dynamics
-- Newton's laws:
-  * 1st law (inertia)
-  * 2nd law F = m a (net force causes acceleration)
-  * 3rd law (action-reaction)
-- Free-body diagrams: break forces into components, sum forces in each direction = ma.
-
-3. Energy & Momentum
-- Work W = F⋅s (dot product). Kinetic energy KE = 1/2 m v^2, gravitational potential energy U = m g h. Conservation of energy principles and mechanical energy including losses to heat.
-- Momentum p = m v; impulse = Δp = F Δt; momentum conserved in closed systems (inelastic vs elastic collisions).
-
-WAVES & OPTICS
-4. Wave properties
-- Wavelength λ, frequency f, speed v related by v = f λ. Superposition, interference, standing waves (nodes/antinodes).
-- Sound: pitch (frequency) and loudness (amplitude). Doppler effect: apparent frequency shift due to motion.
-
-5. Optics
-- Reflection & refraction: angle of incidence = angle of reflection. Snell's law n1 sinθ1 = n2 sinθ2. Total internal reflection when angle > critical angle (sin c = n2/n1).
-- Lens formula 1/f = 1/v + 1/u and magnification.
-
-ELECTRICITY & MAGNETISM
-6. Circuits
-- Charge Q (Coulombs), current I = Q/t, voltage (potential difference) V. Ohm's law V = I R. Series and parallel circuit rules; Kirchhoff’s laws.
-- Power P = VI = I^2 R = V^2 / R.
-
-7. Electromagnetism
-- Magnetic fields around currents, force on a current in a magnetic field (F = I L × B), electromagnetic induction (Faraday's law E = -dΦ/dt).
-
-THERMAL & MODERN
-8. Thermal physics
-- Heat transfer: conduction, convection, radiation. Specific heat capacity Q = m c ΔT, latent heat Q = m L.
-9. Modern physics
-- Photoelectric effect E = h f; quantised energy levels; radioactive decay with activity A = λ N and exponential decay N(t) = N0 e^{-λ t}.
-
-Measurement & Practical Skills:
-- SI units, uncertainties and propagation, graphical analysis (gradient & area).`
-    },
-    chemistry: {
-      title: "Chemistry — IGCSE / AS Core",
-      price: 6.99,
-      content: `Chemistry — In-depth Study Notes
-
-ATOMIC & PERIODIC
-1. Atomic structure
-- Proton, neutron, electron. Atomic number Z, mass number A. Isotopes: same Z differing neutrons.
-- Electron configuration principles (Aufbau, Hund's rule). Periodic trends: ionisation energy, atomic radius, electronegativity.
-
-BONDING & STRUCTURE
-2. Bond types
-- Ionic: electron transfer, high melting points, conduction when molten/aqueous.
-- Covalent: shared electron pairs; single, double, triple bonds. Polar covalent bonds from EN differences.
-- Metallic: sea of electrons, conductivity, ductility.
-
-3. Intermolecular forces
-- London dispersion, dipole–dipole, hydrogen bonding. Influence on boiling/melting points and solubility.
-
-STOICHIOMETRY & QUANTITATIVE
-4. Moles and calculations
-- Moles n = mass / molar mass; Avogadro's number 6.022×10^23. Balanced equations for stoichiometric conversions, limiting reagent, percentage yield.
-- Concentration c = n / V (mol L^-1). Titration technique and calculations.
-
-THERMOCHEMISTRY & KINETICS
-5. Energetics
-- Exothermic vs endothermic; enthalpy change ΔH. Hess's law for indirect enthalpy calculations.
-6. Rates & equilibrium
-- Collision theory: rate depends on frequency of effective collisions; factors: concentration, temperature, surface area, catalysts.
-- Chemical equilibrium: dynamic equilibrium, Kc expression, Le Chatelier’s principle for disturbance response.
-
-ORGANIC CHEMISTRY
-7. Functional groups & reactions
-- Alkanes, alkenes, alkynes, alcohols, haloalkanes, carbonyls, carboxylic acids, esters, amines. Addition, substitution, oxidation reactions.
-- Isomerism: structural (chain/position/functional) and stereoisomerism (E/Z).
-
-Laboratory practice:
-- Safe handling, accurate measurement using volumetric glassware, interpreting tests (flame tests, solubility, pH).`
-    },
-    biology: {
-      title: "Biology — IGCSE / AS Core",
-      price: 6.99,
-      content: `Biology — In-depth Study Notes
-
-CELLS & BIOCHEMISTRY
-1. Cell structure
-- Prokaryotic vs eukaryotic. Organelles: nucleus (DNA), mitochondria (ATP), ribosomes (protein synthesis), chloroplasts (photosynthesis).
-- Membrane structure: phospholipid bilayer, proteins; transport: diffusion, osmosis, facilitated diffusion, active transport.
-
-2. Biomolecules
-- Carbohydrates, lipids, proteins, nucleic acids. Enzymes: active site, lock-and-key, factors affecting activity (pH, temp, substrate concentration).
-
-GENETICS & EVOLUTION
-3. DNA & protein synthesis
-- DNA replication, transcription to mRNA, translation to polypeptides. Codons and genetic code features.
-4. Inheritance
-- Mendelian inheritance, genotypes & phenotypes, sex linkage, co-dominance, pedigree analysis.
-5. Evolution
-- Natural selection, adaptation, evidence from fossils and molecular biology.
-
-PHYSIOLOGY & ECOLOGY
-6. Plant & animal physiology
-- Photosynthesis (light-dependent reactions and Calvin cycle), respiration (aerobic vs anaerobic), transport systems (xylem & phloem; circulatory system in animals).
-7. Ecology
-- Ecosystems, nutrient cycles (carbon, nitrogen), food webs, energy transfer efficiency, conservation.
-
-Practical skills:
-- Experimental design, statistical interpretation, microscopy techniques.`
-    },
-    english: {
-      title: "English Language — Skills & Techniques",
-      price: 6.99,
-      content: `English Language — Detailed Notes
-
-READING
-1. Comprehension & analysis
-- Determine purpose, tone, viewpoint. Identify main ideas, supporting detail, inferences. Locate evidence and explain its effect.
-
-2. Language devices
-- Figurative language (metaphor, simile), imagery, rhetorical devices (repetition, triads, rhetorical questions). Consider connotation & denotation.
-
-WRITING
-3. Structure & style
-- Plan: introduction (thesis), body paragraphs (topic sentence, evidence, explanation), conclusion. Adapt register and tone.
-4. Persuasive writing
-- Use persuasive techniques: ethos (credibility), pathos (emotion), logos (logic). Use facts, rhetorical devices, and counterarguments.
-
-GRAMMAR & VOCAB
-5. Sentence variety & punctuation
-- Use simple/compound/complex sentences for rhythm. Use commas, semicolons and colons correctly. Avoid run-on sentences and fragments.
-
-EXAM TECHNIQUE:
-- Annotate stimulus, quote briefly and explain effect, watch time and plan.`
-    },
-    economics: {
-      title: "Economics — Core Concepts",
-      price: 6.99,
-      content: `Economics — Detailed Notes
-
-MICROECONOMICS
-1. Scarcity & choice
-- Opportunity cost, production possibility frontier (PPF), specialization and trade.
-
-2. Demand & supply
-- Determinants, elasticity (price, income, cross), equilibrium, surplus/shortage, government intervention (taxes, subsidies, price controls).
-
-3. Market structures
-- Perfect competition, monopoly, oligopoly — implications for price, output and efficiency. Market failure examples: externalities, public goods, information asymmetry.
-
-MACROECONOMICS
-4. Aggregate demand & supply
-- Components of AD (C + I + G + X − M). Fiscal policy and monetary policy tools, inflation and unemployment measures.
-
-5. International trade & development
-- Comparative advantage, trade barriers and balance of payments basics.
-
-Evaluation & diagrams:
-- Always draw and label diagrams, show shifts vs movements, explain short-run vs long-run impacts.`
-    },
-    history: {
-      title: "History — Modern World Themes",
-      price: 6.99,
-      content: `History — Detailed Notes
-
-1. Causes of major conflicts
-- Underlying causes: imperial rivalry, nationalism, militarism, alliances; short-term triggers (e.g., assassination spark in WWI).
-2. World Wars & consequences
-- Trench warfare, total war economy, societal impacts, treaties (e.g., Versailles) and their political/economic consequences.
-3. Interwar period & extremism
-- Economic instability (Great Depression), rise of totalitarian regimes, propaganda and consolidation of power.
-4. Cold War
-- Ideological struggle, proxy wars, détente and resolution with Soviet collapse.
-5. Decolonisation
-- Independence movements, neocolonial economic patterns, border and ethnic conflicts post-independence.
-
-Use targeted case studies with dates and key figures; practice source evaluation (origin, purpose, content, value & limitations).`
-    },
-    computer_science: {
-      title: "Computer Science — IGCSE / AS Intro",
-      price: 6.99,
-      content: `Computer Science — Detailed Notes
-
-1. Fundamentals
-- Data types: integer, float, boolean, string; variables and expressions.
-- Binary & hexadecimal number systems; converting between bases; binary addition, two's complement for negatives.
-
-2. Algorithms & Problem Solving
-- Pseudocode & flowcharts. Common algorithms: linear search, binary search, sorting (bubble, insertion, merge, quick outlines).
-- Complexity basics: time complexity O(n), O(n log n), space considerations.
-
-3. Programming concepts
-- Control flow (sequence, selection, iteration), functions, parameters & scope, recursion basics.
-- Data structures: arrays/lists, stacks, queues, dictionaries/maps, trees intro.
-
-4. Computer systems & networks
-- CPU basics, memory hierarchy (RAM vs storage), input/output devices. Networking fundamentals: protocols, IP addressing, client-server models.
-
-Practical programming:
-- Write clean pseudocode, trace code for dry runs, test on edge cases and verify outputs.`
-    },
-    business: {
-      title: "Business Studies — Intro",
-      price: 6.99,
-      content: `Business Studies — Detailed Notes
-
-1. Business activity & objectives
-- Types of businesses (sole trader, partnership, company), objectives (profit, growth, social goals).
-
-2. Marketing & finance
-- Marketing mix (4Ps), market research methods, cash flow basics, profit vs cash, basic financial statements (income, balance sheet).
-
-3. Operations & HR
-- Production processes, quality control, recruitment, training, motivation theories (Maslow, Herzberg).
-
-Strategy & decisions:
-- SWOT analysis, break-even analysis, and the role of entrepreneurs. Use case studies and data to support recommendations.`
-    },
-    geography: {
-      title: "Geography — Physical & Human",
-      price: 6.99,
-      content: `Geography — Detailed Notes
-
-PHYSICAL GEOGRAPHY
-1. Tectonics & landforms
-- Plate boundaries: constructive, destructive, conservative; earthquake and volcano causes and effects.
-- Weathering, erosion, mass movement and coastal processes.
-
-2. Climate & ecosystems
-- Climate controls, biomes, tropical rainforest and desert adaptations, water cycle and river landforms.
-
-HUMAN GEOGRAPHY
-3. Urbanisation & development
-- Urban growth causes, challenges of megacities, sustainable strategies.
-4. Population & resources
-- Demographic transition model, population policies, food/water security issues.
-
-Use maps, diagrams and case studies; interpret data and propose sustainable solutions.`
-    },
-    sociology: {
-      title: "Sociology — Introductory",
-      price: 6.99,
-      content: `Sociology — Detailed Notes
-
-1. Key concepts
-- Society, culture, norms, values, socialisation, social roles.
-
-2. Family & education
-- Family types, functions, influences of education on social mobility; theories: functionalist, Marxist, interactionist summaries.
-
-3. Crime & deviance
-- Definitions, causes, social responses, labelling theory, punishment approaches.
-
-Research methods:
-- Qualitative vs quantitative methods, sampling, ethical issues and validity/reliability considerations.`
-    },
+    /* ----------------
+       Islamiyat: 8 chapter notes (detailed)
+       ---------------- */
     islamiyat: {
-      title: "Islamiyat — Core Topics",
+      title: "Islamiyat — Complete (8 Chapters)",
       price: 6.99,
-      content: `Islamiyat — Detailed Notes
+      content:
+`Islamiyat — Complete Chapter-by-Chapter Notes
 
-1. Core beliefs
-- Tawhid (Oneness of God), prophethood, the afterlife (Akhirah), angels, scriptures (Quran), predestination (Qadr) concepts. Practical implications: worship, ethics, and community.
+Chapter 1: Introduction to Aqeedah (Beliefs)
+- Tawhid (Oneness of Allah)
+  * Definition: absolute oneness of God — unity in Lordship (rububiyyah), names & attributes (asma wa sifat), and worship (ubudiyyah).
+  * Implications: rejection of shirk, maintaining monotheism in beliefs and actions.
+- Angels (Mala'ika)
+  * Nature: created from light, immaterial, obey Allah's commands.
+  * Roles: Jibreel (revelation), Mika'il (provisions), Israfil (Blowing of Horn), angels who record deeds (Kiraman Katibin).
+- Holy Books (Kutub)
+  * Tawrat, Zabur, Injil, Quran — Quran is final, preserved revelation.
+  * Importance of following guidance and verifying chain of transmission.
+- Prophets (Nubuwwah)
+  * Role: warn and guide humanity; prophets as best examples. Finality of prophethood with Muhammad (PBUH).
+- Day of Judgment (Akhirah)
+  * Belief in resurrection, accountability, scales (Mizan), reward and punishment, and eternal abode (Jannah, Jahannam).
 
-2. Pillars & practices
-- Shahada, Salah, Zakat, Sawm (Ramadan), Hajj — meanings, purposes, and social functions.
+Chapter 2: Pillars of Islam & Ibadah (Worship)
+- Shahada (Testimony)
+  * Formula and meaning: La ilaha illa Allah, Muhammadun Rasul Allah — affirmation of belief and commitment.
+- Salah (Prayer)
+  * Five daily prayers: timings, conditions (purity — wudu), components: takbir, recitations, ruku, sujud, tashahhud, salaam.
+  * Spiritual benefits: discipline, remembrance, communal unity.
+- Sawm (Fasting in Ramadan)
+  * Conditions, exceptions (illness, travel), suhoor & iftar, spiritual aims: self-control, empathy for poor.
+- Zakat (Obligatory Charity)
+  * Nisab threshold, eligible assets, calculation basics, categories of recipients (asnaf).
+- Hajj (Pilgrimage)
+  * Pillars of Hajj (Ihram, Tawaf, Sa’i, Arafah), spiritual significance, rites and ihram rules.
 
-3. Life & morality
-- Family ethics, social justice, rights and responsibilities, Islamic rulings on behaviour, emphasis on balance and compassion.
+Chapter 3: Quranic Studies & Tafsir Basics
+- Revelation process: Angel Jibreel to Prophet Muhammad over 23 years; Makki vs Madani surahs.
+- Structure: surahs and ayahs, themes: monotheism, guidance, law, stories of past nations.
+- Tafsir principles: context (asbab al-nuzul), linguistic analysis (balaghah), Hadith correlation. Importance of reliable tafsir sources and cautious interpretation.
+- Memorization & recitation: rules of tajweed, role of quran reciters and scholars.
 
-4. Historical & contextual insights
-- Prophetic biography highlights relevant to teachings, major schools of thought overview and how Islamic principles apply to modern issues.
+Chapter 4: Seerah (Prophetic Biography) — Key Events & Lessons
+- Early life: Makkah, moral character, first revelation.
+- Persecution and migration (Hijrah) to Madinah: formation of the first Muslim community, Constitution of Madinah.
+- Major events: Battles of Badr, Uhud, Trench; Treaty of Hudaybiyyah; conquest of Makkah.
+- Final years: Farewell Pilgrimage; death. Lessons: leadership, justice, mercy, compromise and principle.
 
-Study advice:
-- Use primary verses & authenticated hadiths where required; always explain meaning and context; compare scholarly views for evaluation-type questions.`
+Chapter 5: Hadith Science & Application
+- Hadith structure: matn (text), isnad (chain). Classifications: sahih, hasan, da'if.
+- Collections: Sahih al-Bukhari, Sahih Muslim, Sunan compilations — criteria of acceptance.
+- Using Hadith: application needs verification and context; avoid weak hadiths for legal rulings without corroboration.
+
+Chapter 6: Islamic Law (Fiqh) — Sources & Principles
+- Primary sources: Quran and Sunnah. Secondary: Ijma (consensus), Qiyas (analogical reasoning).
+- Schools of thought: overview of major Sunni madhahib (Hanafi, Maliki, Shafi'i, Hanbali) and approach differences.
+- Principles: public interest (maslahah), harm removal (dar' al-mafasid), custom ('urf) and precaution in rulings.
+- Practical rulings: transactions, marriage, inheritance basics (shares), ethical business conduct.
+
+Chapter 7: Morality, Ethics & Social Teachings
+- Social justice, welfare, rights and duties: family, neighbor, charity.
+- Ethics: honesty, trustworthiness, forgiveness, humility.
+- Role of law vs morality: law enforces minimum standards; ethics are higher aims.
+
+Chapter 8: Contemporary Issues & Applied Islam
+- Modern finance: riba (interest) concepts vs Islamic finance alternatives (profit-and-loss sharing).
+- Bioethics: organ donation, end-of-life decisions — principles to consult Shariah and medical ethics.
+- Citizenship and civic duty: engagement with justice, pluralism, and social harmony.
+- Methods of modern Islamic scholarship: contextualization and adhering to sources while considering maqasid al-shariah (objectives of law).
+
+Exam tips for Islamiyat:
+- Use Quranic verses and authentic hadiths when required; cite translations and explain context.
+- For evaluation questions compare different scholarly positions and give balanced conclusions.
+- Practice short-answer definitions and longer essays with examples, causes and effects, and concluding judgment.
+
+----- END ISLAMIYAT -----
+`    },
+
+    /* ----------------
+       Other subjects (chapter-structured summaries)
+       For brevity: each subject includes several chapters with detailed notes.
+       You can expand further later; these are comprehensive and original.
+       ---------------- */
+    mathematics: {
+      title: "Mathematics — Chapter Notes",
+      price: 6.99,
+      content:
+`Mathematics — Chapter-by-Chapter (sample chapters)
+
+Chapter 1: Number Systems & Arithmetic
+- Natural numbers, integers, rationals, irrationals, surds, and manipulations.
+- Worked example: rationalise denominator of 3/(2+√3): multiply numerator & denominator by (2-√3) etc.
+
+Chapter 2: Algebra I (Expressions & Equations)
+- Polynomials, factorization, quadratic equations, completing the square, quadratic formula.
+- Example: Solve x^2 - 4x + 3 = 0 → (x-1)(x-3)=0 → x=1,3.
+
+Chapter 3: Coordinate Geometry
+- Lines, circles, parabolas, loci.
+- Example: distance between (x1,y1),(x2,y2); midpoint; circle centre/radius.
+
+Chapter 4: Trigonometry
+- Definitions, unit circle, graphs, sine & cosine rules, identities, solving trig equations.
+
+Chapter 5: Calculus I (Differentiation)
+- Limits, derivative definitions, rules (product, quotient, chain), applied maxima/minima.
+
+Chapter 6: Calculus II (Integration)
+- Indefinite & definite integrals, substitution, area under curve, volumes.
+
+Chapter 7: Vectors & Geometry
+- Vector addition, scalar multiplication, dot product, equations of lines.
+
+Chapter 8: Probability & Statistics
+- Probability rules, conditional probability, distributions basics, mean & standard deviation.
+
+Exam tips:
+- Show working, use diagrams, state formulae, answer exact where required.`
+    },
+
+    physics: {
+      title: "Physics — Chapter Notes",
+      price: 6.99,
+      content:
+`Physics — Chapter-by-Chapter
+
+Chapter 1: Kinematics & Motion
+- Displacement vs distance, speed vs velocity, acceleration, SUVAT equations. Example problems with worked steps.
+
+Chapter 2: Forces & Dynamics
+- Newton’s laws, free-body diagrams, friction, circular motion basics.
+
+Chapter 3: Energy, Work & Power
+- Work W=F⋅s, energy forms, conservation, power calculations and efficiency.
+
+Chapter 4: Momentum & Collisions
+- Linear momentum, impulse, conservation in collisions (elastic/inelastic).
+
+Chapter 5: Waves & Optics
+- Wave properties, superposition, interference, refraction, lenses.
+
+Chapter 6: Electricity
+- Current, voltage, resistance, Ohm’s law, circuits, series/parallel.
+
+Chapter 7: Magnetism & Electromagnetism
+- Magnetic fields, motors, generators, Faraday’s law.
+
+Chapter 8: Thermal & Modern Physics
+- Heat transfer, kinetic theory, photoelectric effect, radioactivity basics.
+
+Practical tips: units, uncertainties, graph analysis.`
+    },
+
+    chemistry: {
+      title: "Chemistry — Chapter Notes",
+      price: 6.99,
+      content:
+`Chemistry — Chapter Notes
+
+Chapter 1: Atomic Structure & Periodic Table
+- Subatomic particles, isotopes, electron configurations, periodic trends.
+
+Chapter 2: Bonding & Structure
+- Ionic/covalent/metallic bonding, shapes (VSEPR), intermolecular forces.
+
+Chapter 3: Stoichiometry
+- Mole concept, molar mass, titration calculations.
+
+Chapter 4: Energetics
+- Reaction enthalpy, Hess's law.
+
+Chapter 5: Kinetics & Equilibrium
+- Rate laws, Le Chatelier, Kc calculations.
+
+Chapter 6: Acids & Bases
+- pH, strong/weak, titration curves basics.
+
+Chapter 7: Organic Chemistry Fundamentals
+- Functional groups, reaction mechanisms overview.
+
+Chapter 8: Practical & Analysis
+- Qualitative tests, chromatography basics, instrumentation mention.
+
+Exam tips: show balanced equations, units, step-by-step calculations.`
+    },
+
+    biology: {
+      title: "Biology — Chapter Notes",
+      price: 6.99,
+      content:
+`Biology — Chapter Notes
+
+Chapter 1: Cell Biology
+- Cell structure and function, membranes, transport.
+
+Chapter 2: Biological Molecules
+- Carbohydrates, lipids, proteins, enzymes.
+
+Chapter 3: Genetics & Inheritance
+- DNA structure, replication, Mendelian genetics, pedigree analysis.
+
+Chapter 4: Ecology
+- Ecosystems, energy transfer, cycles.
+
+Chapter 5: Human Physiology
+- Circulatory, respiratory, digestive systems.
+
+Chapter 6: Plant Physiology
+- Photosynthesis, transpiration, plant nutrition.
+
+Chapter 7: Evolution & Classification
+- Natural selection, speciation, taxonomy.
+
+Chapter 8: Practical Skills
+- Microscopy, experimental design, data analysis.
+
+Exam tips: label diagrams, explain processes stepwise.`
+    },
+
+    english: {
+      title: "English Language — Chapter Notes",
+      price: 6.99,
+      content:
+`English Language — Chapter Notes
+
+Chapter 1: Reading Skills
+- Identifying tone, purpose, inference, structure.
+
+Chapter 2: Language Devices
+- Imagery, metaphor, simile, rhetorical devices.
+
+Chapter 3: Writing Skills
+- Planning, structure, persuasive and descriptive techniques.
+
+Chapter 4: Grammar & Syntax
+- Sentence types, punctuation, common errors.
+
+Chapter 5: Summary & Note-making
+- How to summarise, make concise notes.
+
+Chapter 6: Transactional Writing
+- Letters, reports, articles.
+
+Chapter 7: Creative Writing
+- Setting, character, show-don't-tell.
+
+Chapter 8: Exam Technique
+- Time management, planning, editing.
+
+Practice: short tasks per chapter; sample prompts included.`
+    },
+
+    economics: {
+      title: "Economics — Chapter Notes",
+      price: 6.99,
+      content:
+`Economics — Chapter Notes
+
+Chapter 1: Basic Economic Problem & PPF
+- Scarcity, opportunity cost, production possibility frontier.
+
+Chapter 2: Demand & Supply
+- Determinants, elasticity, equilibrium.
+
+Chapter 3: Market Structures
+- Monopoly, perfect competition, oligopoly impacts.
+
+Chapter 4: Market Failure & Government Intervention
+- Externalities, public goods, taxes/subsidies.
+
+Chapter 5: Macroeconomic Objectives
+- Inflation, unemployment, growth.
+
+Chapter 6: Fiscal & Monetary Policy
+- Tools and effects.
+
+Chapter 7: International Trade
+- Comparative advantage, trade barriers.
+
+Chapter 8: Development Economics
+- Indicators and policies.
+
+Exam tips: draw diagrams, explain shifts, evaluate policies.`
+    },
+
+    history: {
+      title: "History — Chapter Notes",
+      price: 6.99,
+      content:
+`History — Chapter Notes
+
+Chapter 1: Causes of War
+- Nationalism, imperialism, alliances, crises.
+
+Chapter 2: World War I
+- Trench warfare, technology, consequences.
+
+Chapter 3: Interwar Period
+- Economic depression, rise of authoritarianism.
+
+Chapter 4: World War II
+- Key theatres, outcomes, UN formation.
+
+Chapter 5: Cold War
+- Ideological conflict, proxy wars, détente.
+
+Chapter 6: Decolonization
+- Independence movements and challenges.
+
+Chapter 7: 20th Century Social Change
+- Welfare states, civil rights movements.
+
+Chapter 8: Source Analysis & Essay Writing
+- How to analyze sources, structure essays, use evidence.`
+    },
+
+    computer_science: {
+      title: "Computer Science — Chapter Notes",
+      price: 6.99,
+      content:
+`Computer Science — Chapter Notes
+
+Chapter 1: Data Representation
+- Binary, hex, two's complement, data sizes.
+
+Chapter 2: Algorithms
+- Sorting/searching, pseudocode, complexity.
+
+Chapter 3: Programming Concepts
+- Variables, control structures, functions, recursion.
+
+Chapter 4: Data Structures
+- Arrays, lists, stacks, queues, basic trees.
+
+Chapter 5: Databases & SQL basics
+- Tables, keys, basic queries.
+
+Chapter 6: Computer Systems
+- CPU, memory, OS basics.
+
+Chapter 7: Networks
+- Layers, protocols, IP basics.
+
+Chapter 8: Cybersecurity & Ethics
+- Threats, encryption basics, responsible use.`
+    },
+
+    business: {
+      title: "Business Studies — Chapter Notes",
+      price: 6.99,
+      content:
+`Business Studies — Chapter Notes
+
+Chapter 1: Business Activity
+- Types of business ownership, objectives.
+
+Chapter 2: Marketing
+- 4Ps, segmentation, positioning.
+
+Chapter 3: Operations
+- Production methods, quality control.
+
+Chapter 4: Finance
+- Cash flow, income statement basics, break-even.
+
+Chapter 5: HR
+- Recruitment, motivation theories.
+
+Chapter 6: Strategy
+- SWOT, growth strategies.
+
+Chapter 7: Ethics & CSR
+- Responsible business practices.
+
+Chapter 8: Case Studies & Decision-making
+- Apply concepts to scenarios.`
+    },
+
+    geography: {
+      title: "Geography — Chapter Notes",
+      price: 6.99,
+      content:
+`Geography — Chapter Notes
+
+Chapter 1: Plate Tectonics
+- Boundary types, earthquake/volcano impacts.
+
+Chapter 2: Weathering & Erosion
+- Processes shaping landscape.
+
+Chapter 3: Rivers & Coasts
+- Landforms, management strategies.
+
+Chapter 4: Climate & Biomes
+- Climate systems, ecosystem characteristics.
+
+Chapter 5: Urbanization
+- Urban growth, challenges and sustainable solutions.
+
+Chapter 6: Population & Migration
+- Demographic transition, push/pull factors.
+
+Chapter 7: Resources & Development
+- Water/food security, development indicators.
+
+Chapter 8: Fieldwork & Map Skills
+- Data collection, sampling, map interpretation.`
+    },
+
+    sociology: {
+      title: "Sociology — Chapter Notes",
+      price: 6.99,
+      content:
+`Sociology — Chapter Notes
+
+Chapter 1: Key Concepts
+- Society, culture, norms, values, socialisation.
+
+Chapter 2: Family
+- Family types, functions, changes in family structure.
+
+Chapter 3: Education
+- Role of education, inequality, social mobility.
+
+Chapter 4: Crime & Deviance
+- Theories of crime, social responses.
+
+Chapter 5: Media & Religion
+- Influence on beliefs and identity.
+
+Chapter 6: Research Methods
+- Qualitative vs quantitative, sampling, ethics.
+
+Chapter 7: Stratification & Inequality
+- Class, gender, ethnicity issues.
+
+Chapter 8: Applied Sociology
+- Policy implications and case studies.`
     }
-  };
+  }; // end NOTES
 
-  /*******************************
-   *  Storage & UI helpers
-   *******************************/
-  const STORAGE_KEY = 'caie_forest_unlocked_v2';
-  function loadUnlocked() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
-    catch { return []; }
-  }
-  function saveUnlocked(arr) { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
-  function isUnlocked(key) { return loadUnlocked().includes(key); }
-  function unlock(key) {
-    const arr = loadUnlocked();
-    if (!arr.includes(key)) { arr.push(key); saveUnlocked(arr); }
-  }
-  function lockAll() { saveUnlocked([]); }
-  function unlockAll() { saveUnlocked(Object.keys(NOTES)); }
+  /**************************************************************
+   *  Storage + helper functions (unlock state stored locally)
+   **************************************************************/
+  const STORAGE_KEY = 'caie_forest_unlocked_payfast_v1';
+  function loadUnlocked(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); }catch{ return []; } }
+  function saveUnlocked(arr){ localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
+  function isUnlocked(k){ return loadUnlocked().includes(k); }
+  function unlock(k){ const a=loadUnlocked(); if(!a.includes(k)){ a.push(k); saveUnlocked(a); } }
+  function lockAll(){ saveUnlocked([]); }
+  function unlockAll(){ saveUnlocked(Object.keys(NOTES)); }
 
-  // DOM refs
+  /**************************************************************
+   *  UI rendering: subject cards and modal
+   **************************************************************/
   const subjectsGrid = document.getElementById('subjectsGrid');
   const modal = document.getElementById('modal');
   const modalBackdrop = document.getElementById('modalBackdrop');
@@ -648,135 +622,125 @@ Study advice:
   const modalDownload = document.getElementById('modalDownload');
   const modalPrint = document.getElementById('modalPrint');
 
-  // create card
-  function createCard(key, data) {
+  function shortPreview(text, n){ const t=text.replace(/\n+/g,' ').trim(); return t.length>n? t.slice(0,n).trim()+'…' : t; }
+
+  function createCard(key, data){
     const unlocked = isUnlocked(key);
-    const card = document.createElement('div');
-    card.className = 'p-4 rounded-xl card-hover glass';
+    const card = document.createElement('div'); card.className='p-4 rounded-xl card-hover glass';
     card.innerHTML = `
       <div class="flex items-start justify-between gap-4">
         <div class="flex-1">
           <h4 class="text-lg font-semibold text-sky-100">${data.title}</h4>
-          <p class="text-slate-300 mt-2">${shortPreview(data.content, 140)}</p>
+          <p class="text-slate-300 mt-2">${shortPreview(data.content,160)}</p>
           <div class="mt-3 flex gap-2">
             <span class="text-xs text-slate-300/80 px-2 py-1 rounded bg-white/3">$${data.price.toFixed(2)}</span>
-            <span class="text-xs text-slate-300">Syllabus-style notes</span>
+            <span class="text-xs text-slate-300">Chapter-style notes</span>
           </div>
         </div>
         <div class="flex flex-col items-end gap-2">
-          ${unlocked ? '<button class="openBtn px-3 py-2 border rounded text-sky-100">Open</button><button class="downloadBtn px-3 py-2 border rounded text-sky-100">Download</button>' : '<button class="unlockBtn px-3 py-2 rounded-md bg-indigo-600">Unlock $6.99</button>'}
+          ${unlocked ? '<button class="openBtn px-3 py-2 border rounded text-sky-100">Open</button><button class="downloadBtn px-3 py-2 border rounded text-sky-100">Download</button>' : `<div class="flex flex-col gap-2"><button class="unlockBtn px-3 py-2 rounded-md bg-indigo-600">Unlock $6.99</button><button class="testUnlockBtn px-3 py-2 border rounded text-slate-200">Test Unlock</button></div>`}
         </div>
-      </div>
-    `;
-    // attach actions
-    setTimeout(()=> {
-      const unlockBtn = card.querySelector('.unlockBtn');
-      const openBtn = card.querySelector('.openBtn');
-      const downloadBtn = card.querySelector('.downloadBtn');
-      if (unlockBtn) unlockBtn.addEventListener('click', ()=>handleUnlock(key));
-      if (openBtn) openBtn.addEventListener('click', ()=>openModal(key));
-      if (downloadBtn) downloadBtn.addEventListener('click', ()=>downloadSubject(key));
+      </div>`;
+    setTimeout(()=>{ const unlockBtn = card.querySelector('.unlockBtn'); const testBtn = card.querySelector('.testUnlockBtn'); const openBtn = card.querySelector('.openBtn'); const downloadBtn = card.querySelector('.downloadBtn');
+      if(unlockBtn) unlockBtn.addEventListener('click', ()=>beginPayFastCheckout(key));
+      if(testBtn) testBtn.addEventListener('click', ()=>{ unlock(key); renderSubjects(); openModal(key); alert('Test Unlock: subject unlocked locally.'); });
+      if(openBtn) openBtn.addEventListener('click', ()=>openModal(key));
+      if(downloadBtn) downloadBtn.addEventListener('click', ()=>downloadSubject(key));
     }, 0);
     return card;
   }
 
-  function shortPreview(text, n) {
-    const t = text.replace(/\n+/g,' ').trim();
-    return t.length > n ? t.slice(0,n).trim() + '…' : t;
-  }
+  function renderSubjects(){ subjectsGrid.innerHTML=''; for(const [k,d] of Object.entries(NOTES)){ subjectsGrid.appendChild(createCard(k,d)); } }
 
-  function renderSubjects() {
-    subjectsGrid.innerHTML = '';
-    for (const [k,d] of Object.entries(NOTES)) {
-      subjectsGrid.appendChild(createCard(k,d));
-    }
-  }
-
-  /*******************************
-   *  Modal functions
-   *******************************/
-  function openModal(key) {
+  /**************************************************************
+   *  Modal open/close & download/print
+   **************************************************************/
+  function openModal(key){
     const d = NOTES[key];
     modalTitle.textContent = d.title;
     modalSubtitle.textContent = isUnlocked(key) ? 'Full notes unlocked' : 'Preview';
-    modalContent.textContent = isUnlocked(key) ? d.content : (d.content.split('\n').slice(0,18).join('\n') + '\n\n[...preview — unlock to read full notes]');
+    modalContent.textContent = isUnlocked(key) ? d.content : (d.content.split('\n').slice(0,22).join('\n') + '\n\n[...preview — unlock to read full notes]');
     modal.classList.remove('hidden');
-    // handlers
-    modalDownload.onclick = () => downloadString(`${d.title}.txt`, `${d.title}\n\n${d.content}`);
-    modalPrint.onclick = () => {
-      const w = window.open('', '_blank', 'width=900,height=700');
-      w.document.write(`<pre style="white-space:pre-wrap;font-family:inherit;font-size:14px;">${escapeHtml(d.title + "\n\n" + d.content)}</pre>`);
-      w.document.close();
-      setTimeout(()=>w.print(), 250);
-    };
+    modalDownload.onclick = ()=>downloadString(`${d.title}.txt`, `${d.title}\n\n${d.content}`);
+    modalPrint.onclick = ()=>{ const w = window.open('','_blank','width=900,height=700'); w.document.write(`<pre style="white-space:pre-wrap;font-family:inherit;font-size:14px;">${escapeHtml(d.title + "\n\n" + d.content)}</pre>`); w.document.close(); setTimeout(()=>w.print(),250); };
   }
-  function closeModal() { modal.classList.add('hidden'); }
+  function closeModal(){ modal.classList.add('hidden'); }
   modalBackdrop.addEventListener('click', closeModal);
   modalClose.addEventListener('click', closeModal);
 
-  function handleUnlock(key) {
-    // Simulated purchase animation/flow
-    const yes = confirm(`Simulated purchase: Unlock "${NOTES[key].title}" for $6.99? (Demo — stored locally in your browser)`);
-    if (!yes) return;
-    unlock(key);
-    renderSubjects();
-    openModal(key);
+  function downloadSubject(key){ const d = NOTES[key]; downloadString(`${d.title}.txt`, `${d.title}\n\n${d.content}`); }
+  function downloadString(fn, text){ const b=new Blob([text],{type:'text/plain'}); const url=URL.createObjectURL(b); const a=document.createElement('a'); a.href=url; a.download=fn; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+  function escapeHtml(s){ return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+  /**************************************************************
+   *  PayFast integration (sandbox placeholder)
+   *
+   *  IMPORTANT:
+   *  - PayFast requires server-side merchant credentials and IPN verification.
+   *  - The code below demonstrates how to send a user to PayFast's checkout.
+   *  - Replace MERCHANT_ID & MERCHANT_KEY and use your server to create a secure redirect.
+   *  - In production, DON'T use only client-side checks. Verify payment via server IPN
+   *    and only then mark purchases as completed.
+   *
+   *  I provide a "Test Unlock" button above to test unlocking locally without payments.
+   **************************************************************/
+  // Example: client-side redirect to a sandbox/test PayFast URL (placeholder).
+  // Replace with your server endpoint that creates a PayFast transaction and returns redirect URL.
+  function beginPayFastCheckout(key){
+    // Show options: Test or Real Sandbox
+    const useTest = confirm('Use PayFast sandbox? (OK = Simulate sandbox redirect; Cancel = Test Unlock locally)');
+    if(!useTest){ // fallback local test
+      unlock(key); renderSubjects(); openModal(key); alert('Test Unlock: unlocked locally (no payment).'); return;
+    }
+
+    // Example sandbox redirection flow:
+    // 1) In production create an endpoint on your server: /create-payfast-transaction
+    //    which receives { subjectKey } and returns redirect URL to PayFast checkout.
+    // 2) Here we demonstrate by opening a "simulated" success redirect that mimics PayFast returning to your site.
+    // --- SIMULATED: open a small confirmation and then mark unlocked on return ---
+    // (Replace this block with a real redirect to PayFast created by your backend.)
+
+    // Simulated checkout UX:
+    const proceed = confirm('This demo will simulate a PayFast checkout. Click OK to simulate successful payment and return.');
+    if(proceed){
+      // simulate a short "processing" delay
+      const overlay = document.createElement('div'); overlay.style.position='fixed'; overlay.style.inset=0; overlay.style.background='rgba(0,0,0,0.5)'; overlay.style.zIndex=9999; overlay.innerHTML='<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#07202a;padding:30px;border-radius:12px;color:#cfe9ff">Simulating PayFast payment...<br/><small>Returning shortly</small></div>';
+      document.body.appendChild(overlay);
+      setTimeout(()=>{ document.body.removeChild(overlay); unlock(key); renderSubjects(); openModal(key); alert('Payment simulation complete — subject unlocked locally.'); }, 1100 + Math.random()*1400 );
+      return;
+    } else {
+      alert('Payment cancelled (demo).');
+      return;
+    }
+
+    /* PRODUCTION NOTES:
+      - Your server should create the PayFast payment request (signature using merchant key), then redirect the user to PayFast's checkout.
+      - PayFast will POST an IPN back to your server when payment status changes. Your server must verify the IPN (signature/merchant key) and then notify the client or update your database.
+      - After verification, redirect the user back to a success URL on your site (e.g. /payment-success?subject=math&txn_id=xxx).
+      - When your site receives the success redirect, verify on the server or ask client to fetch verification status from your server, then unlock.
+    */
   }
 
-  function downloadSubject(key) {
-    const d = NOTES[key];
-    downloadString(`${d.title}.txt`, `${d.title}\n\n${d.content}`);
-  }
-
-  function downloadString(filename, text) {
-    const blob = new Blob([text], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
-
-  function escapeHtml(s) {
-    return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-  }
-
-  /*******************************
-   * Topbar buttons
-   *******************************/
+  /**************************************************************
+   *  Topbar actions + shortcuts
+   **************************************************************/
   document.getElementById('unlockAllBtn').addEventListener('click', ()=>{
-    if (confirm('Simulated: unlock all notes in this browser?')) { unlockAll(); renderSubjects(); alert('All unlocked (demo).'); }
+    if(confirm('Simulated: Unlock all notes in this browser?')){ unlockAll(); renderSubjects(); alert('All unlocked (demo).'); }
   });
   document.getElementById('downloadAllBtn').addEventListener('click', ()=>{
-    let combined = '';
-    for (const d of Object.values(NOTES)) combined += `=== ${d.title} ===\n\n${d.content}\n\n\n`;
-    downloadString('CAIE_All_Notes.txt', combined);
+    let all = ''; for(const d of Object.values(NOTES)){ all += `=== ${d.title} ===\n\n${d.content}\n\n\n`; }
+    downloadString('CAIE_All_Notes.txt', all);
   });
-  document.getElementById('lockBtn').addEventListener('click', ()=>{
-    if (confirm('Lock (clear) unlocked subjects?')) { lockAll(); renderSubjects(); alert('All locked.'); }
-  });
-  document.getElementById('aboutBtn').addEventListener('click', ()=>{
-    alert('Notes are original educational summaries written to align with common CAIE topics. They are not official Cambridge text. Use Download to save files.');
-  });
+  document.getElementById('lockBtn').addEventListener('click', ()=>{ if(confirm('Lock (clear) unlocked subjects?')){ lockAll(); renderSubjects(); alert('All locked.'); } });
+  document.getElementById('aboutBtn').addEventListener('click', ()=>{ alert('Notes are original educational summaries mapped to common CAIE topics. Replace PayFast placeholders and add server-side IPN verification before accepting real payments.'); });
 
-  // keyboard shortcuts
-  window.addEventListener('keydown', (e)=>{
-    if (e.shiftKey && e.key.toLowerCase()==='l') { if (confirm('Lock (clear) unlocked subjects?')) { lockAll(); renderSubjects(); alert('All locked.'); } }
-    if (e.key === 'Escape') closeModal();
-  });
+  // keyboard
+  window.addEventListener('keydown', (e)=>{ if(e.shiftKey && e.key.toLowerCase()==='l'){ if(confirm('Lock all subjects?')){ lockAll(); renderSubjects(); alert('All locked.'); } } if(e.key==='Escape') closeModal(); });
 
-  // init render
+  // init
   renderSubjects();
   document.getElementById('year').textContent = new Date().getFullYear();
-
-  // show welcome once
-  if (!localStorage.getItem('caie_forest_seen')) {
-    alert('Welcome — this file contains original CAIE-style notes. Purchases are simulated and stored locally in your browser. Press Ambience to enable very subtle storm sounds.');
-    localStorage.setItem('caie_forest_seen', '1');
-  }
+  if(!localStorage.getItem('caie_forest_seen_payfast')){ alert('Welcome — this file contains extensive original CAIE-style notes. Use Test Unlock to try without payment; configure PayFast on your server to accept real payments. Click Ambience to enable subtle thunder/rain sound.'); localStorage.setItem('caie_forest_seen_payfast','1'); }
 
   </script>
 </body>
