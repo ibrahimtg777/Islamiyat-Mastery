@@ -366,53 +366,218 @@ Exam tips:
 - Processes of independence, economic and social change.
 
 Exam tips:
-- Use timelines, cause-effect chains, primary & secondary sources.`
+- Use timelines, cause-effect chains, primary source analysis.`
+    },
+    "islamiyat": {
+      title: "Islamiyat (Compulsory Subject for O-Level)",
+      price: 6.99,
+      content:
+`Islamiyat — Comprehensive Study Notes
+
+1. Beliefs & Pillars of Islam
+- Tawheed (Oneness of Allah), Five Pillars: Shahadah, Salah, Zakat, Sawm, Hajj.
+
+2. Seerah & Prophethood
+- Life of Prophet Muhammad (PBUH), major events, lessons.
+
+3. Islamic Ethics & Morality
+- Justice, honesty, kindness, social responsibility.
+
+4. Islamic Law (Shariah)
+- Sources: Quran, Sunnah, Ijma, Qiyas. Basic rulings.
+
+5. Important Events
+- Hijrah, Battles of Badr and Uhud, Treaty of Hudaybiyyah.
+
+Exam Tips:
+- Memorise key verses and hadiths. Explain concepts with examples.`
+    },
+    "computer_science": {
+      title: "Computer Science (IGCSE / O-Level)",
+      price: 6.99,
+      content:
+`Computer Science — Comprehensive Study Notes
+
+1. Data Representation
+- Binary, hexadecimal, data types, character encoding (ASCII, Unicode).
+
+2. Programming Fundamentals
+- Variables, data structures, control flow (if, loops), functions.
+
+3. Algorithms & Problem Solving
+- Searching, sorting, pseudocode, flowcharts.
+
+4. Computer Systems
+- Hardware, software, operating systems, networks.
+
+5. Databases & Security
+- Relational databases, SQL basics, cybersecurity principles.
+
+Exam Tips:
+- Write clear pseudocode. Understand logic and problem solving.`
     }
   };
 
+  // Local Storage keys for unlock state
   const STORAGE_KEY = 'caieNotesUnlocked';
 
-  // Save/load unlocked subjects locally
-  function loadUnlocked() {
-    try {
-      const data = localStorage.getItem(STORAGE_KEY);
-      if (!data) return [];
-      return JSON.parse(data);
-    } catch {
-      return [];
-    }
-  }
-  function saveUnlocked(arr) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
-  }
-  function isUnlocked(key) {
-    return loadUnlocked().includes(key);
-  }
-  function unlockSubject(key) {
-    const unlocked = loadUnlocked();
-    if (!unlocked.includes(key)) {
-      unlocked.push(key);
-      saveUnlocked(unlocked);
-    }
-  }
-  function lockAll() {
-    localStorage.removeItem(STORAGE_KEY);
+  // Store unlocked subjects in a Set for quick lookup
+  let unlockedSubjects = new Set();
+
+  // Utility: Format price with $ and 2 decimals
+  function formatPrice(p) {
+    return `$${p.toFixed(2)}`;
   }
 
-  // DOM refs
+  // Update year
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // Build subject cards dynamically
   const subjectsGrid = document.getElementById('subjectsGrid');
+
+  function createSubjectCard(key, note) {
+    const card = document.createElement('article');
+    card.setAttribute('tabindex', '0');
+    card.className = 'glass rounded-xl p-5 cursor-pointer card-hover flex flex-col justify-between shadow-lg';
+    card.setAttribute('aria-label', note.title + (isUnlocked(key) ? ' (Unlocked)' : ' (Locked)'));
+
+    const h3 = document.createElement('h3');
+    h3.className = 'text-lg font-semibold mb-2 text-sky-200';
+    h3.textContent = note.title;
+    card.appendChild(h3);
+
+    const p = document.createElement('p');
+    p.className = 'text-slate-300 flex-grow';
+    p.textContent = note.content.slice(0, 150) + '...';
+    card.appendChild(p);
+
+    const footer = document.createElement('footer');
+    footer.className = 'mt-4 flex justify-between items-center';
+
+    const price = document.createElement('div');
+    price.className = 'font-bold text-indigo-300';
+    price.textContent = formatPrice(note.price);
+    footer.appendChild(price);
+
+    const btn = document.createElement('button');
+    btn.className = 'bg-indigo-600 hover:bg-indigo-700 text-white py-1 px-3 rounded text-sm font-semibold';
+    btn.textContent = isUnlocked(key) ? 'View' : 'Unlock';
+    btn.setAttribute('aria-pressed', isUnlocked(key));
+    footer.appendChild(btn);
+
+    card.appendChild(footer);
+
+    // Click behavior
+    card.addEventListener('click', e => {
+      if (e.target.tagName === 'BUTTON') {
+        // Button click
+        if (isUnlocked(key)) {
+          openNoteModal(key);
+        } else {
+          openPayFastModal(key);
+        }
+      } else {
+        // Card body click
+        if (isUnlocked(key)) {
+          openNoteModal(key);
+        } else {
+          openPayFastModal(key);
+        }
+      }
+    });
+
+    // Keyboard enter key activates card button
+    card.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        if (isUnlocked(key)) {
+          openNoteModal(key);
+        } else {
+          openPayFastModal(key);
+        }
+      }
+    });
+
+    return card;
+  }
+
+  function isUnlocked(key) {
+    return unlockedSubjects.has(key);
+  }
+
+  function saveUnlocked() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(unlockedSubjects)));
+  }
+
+  function loadUnlocked() {
+    const data = localStorage.getItem(STORAGE_KEY);
+    if (data) {
+      try {
+        const arr = JSON.parse(data);
+        unlockedSubjects = new Set(arr);
+      } catch {
+        unlockedSubjects = new Set();
+      }
+    }
+  }
+
+  function refreshUI() {
+    subjectsGrid.innerHTML = '';
+    for (const key of Object.keys(NOTES)) {
+      subjectsGrid.appendChild(createSubjectCard(key, NOTES[key]));
+    }
+  }
+
+  // Modal helpers
   const modal = document.getElementById('modal');
+  const modalBackdrop = document.getElementById('modalBackdrop');
   const modalTitle = document.getElementById('modalTitle');
   const modalContent = document.getElementById('modalContent');
   const modalClose = document.getElementById('modalClose');
   const modalDownload = document.getElementById('modalDownload');
   const modalPrint = document.getElementById('modalPrint');
-  const unlockAllBtn = document.getElementById('unlockAllBtn');
-  const exportAllBtn = document.getElementById('exportAllBtn');
 
-  // Payment modal refs
+  function openNoteModal(key) {
+    const note = NOTES[key];
+    modalTitle.textContent = note.title;
+    modalContent.textContent = note.content;
+    modal.dataset.subject = key;
+    modal.classList.remove('hidden');
+    modal.focus();
+  }
+  function closeNoteModal() {
+    modal.classList.add('hidden');
+  }
+  modalClose.addEventListener('click', closeNoteModal);
+  modalBackdrop.addEventListener('click', closeNoteModal);
+
+  modalDownload.addEventListener('click', () => {
+    const key = modal.dataset.subject;
+    if (!key) return;
+    const note = NOTES[key];
+    const filename = `${note.title.replace(/\s+/g,'_').toLowerCase()}.txt`;
+    const blob = new Blob([note.content], {type: 'text/plain'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  modalPrint.addEventListener('click', () => {
+    const key = modal.dataset.subject;
+    if (!key) return;
+    const note = NOTES[key];
+    const printWindow = window.open('', '', 'width=800,height=600');
+    printWindow.document.write(`<pre style="white-space: pre-wrap; font-family: monospace; font-size: 16px;">${note.content}</pre>`);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+  });
+
+  // PayFast demo modal
   const payfastModal = document.getElementById('payfastModal');
-  const payfastForm = document.getElementById('payfastForm');
+  const pfForm = document.getElementById('payfastForm');
   const pfName = document.getElementById('pfName');
   const pfEmail = document.getElementById('pfEmail');
   const pfCard = document.getElementById('pfCard');
@@ -422,170 +587,102 @@ Exam tips:
   const pfPay = document.getElementById('pfPay');
   const pfSpinner = document.getElementById('pfSpinner');
 
-  let currentPaymentKey = null;
+  let currentPaySubject = null;
 
-  // Create subject card
-  function createCard(key, data) {
-    const unlocked = isUnlocked(key);
-    const div = document.createElement('div');
-    div.className = 'p-4 rounded-xl glass card-hover transition transform flex flex-col justify-between';
-    div.innerHTML = `
-      <div>
-        <h4 class="text-lg font-semibold text-sky-100">${data.title}</h4>
-        <p class="text-sm text-slate-300 mt-2">${data.content.split('\n')[0].slice(0,120)}...</p>
-      </div>
-      <div class="text-right mt-4 flex flex-col items-end gap-2 btn-group">
-        <div>
-          <span class="text-xs text-slate-300">Price</span>
-          <div class="text-xl font-bold text-sky-200">$${data.price.toFixed(2)}</div>
-        </div>
-        ${
-          unlocked
-            ? `<button class="openBtn px-3 py-2 rounded-md border text-sky-100">Open</button>
-               <button class="downloadBtn px-3 py-2 rounded-md border text-sky-100">Download</button>`
-            : `<button class="unlockBtn px-3 py-2 rounded-md bg-indigo-600 text-white">Unlock</button>`
-        }
-      </div>
-    `;
-    const unlockBtn = div.querySelector('.unlockBtn');
-    const openBtn = div.querySelector('.openBtn');
-    const downloadBtn = div.querySelector('.downloadBtn');
-    if (unlockBtn) unlockBtn.addEventListener('click', () => handleUnlock(key));
-    if (openBtn) openBtn.addEventListener('click', () => openModal(key));
-    if (downloadBtn) downloadBtn.addEventListener('click', () => downloadSubject(key));
-    return div;
-  }
-
-  // Render all subjects
-  function renderSubjects() {
-    subjectsGrid.innerHTML = '';
-    for (const [key, data] of Object.entries(NOTES)) {
-      subjectsGrid.appendChild(createCard(key, data));
-    }
-  }
-
-  // Open notes modal
-  function openModal(key) {
-    modalTitle.textContent = NOTES[key].title;
-    modalContent.textContent = NOTES[key].content;
-    modal.classList.remove('hidden');
-  }
-  modalClose.addEventListener('click', () => {
-    modal.classList.add('hidden');
-  });
-  document.getElementById('modalBackdrop').addEventListener('click', () => {
-    modal.classList.add('hidden');
-  });
-
-  // Download notes as .txt
-  function downloadSubject(key) {
-    const data = NOTES[key];
-    const filename = `${data.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`;
-    const blob = new Blob([data.content], {type: 'text/plain'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  // Handle unlock button click: open payment modal
-  function handleUnlock(key) {
-    currentPaymentKey = key;
-    payfastForm.reset();
+  function openPayFastModal(subjectKey) {
+    currentPaySubject = subjectKey;
+    pfForm.reset();
     pfPay.disabled = false;
     pfSpinner.classList.add('hidden');
     payfastModal.classList.remove('hidden');
     pfName.focus();
   }
+  function closePayFastModal() {
+    payfastModal.classList.add('hidden');
+    currentPaySubject = null;
+  }
+  pfCancel.addEventListener('click', closePayFastModal);
+  payfastModal.addEventListener('click', (e) => {
+    if (e.target === payfastModal) closePayFastModal();
+  });
 
-  // Payment form submission (demo)
-  payfastForm.addEventListener('submit', e => {
+  pfForm.addEventListener('submit', e => {
     e.preventDefault();
-
-    // Basic validation
-    if (!pfName.value.trim() || !pfEmail.value.trim() || !pfCard.value.match(/^\d{13,19}$/) || !pfExpiry.value.match(/^(0[1-9]|1[0-2])\/\d{2}$/) || !pfCVV.value.match(/^\d{3,4}$/)) {
-      alert("Please fill all fields correctly.");
+    if (!pfForm.checkValidity()) {
+      pfForm.reportValidity();
       return;
     }
-
+    // Simulate payment process
     pfPay.disabled = true;
     pfSpinner.classList.remove('hidden');
-
     setTimeout(() => {
-      unlockSubject(currentPaymentKey);
-      renderSubjects();
-      payfastModal.classList.add('hidden');
-      alert(`Payment successful! Notes for "${NOTES[currentPaymentKey].title}" are now unlocked.`);
+      // Unlock subject
+      unlockedSubjects.add(currentPaySubject);
+      saveUnlocked();
+      refreshUI();
+      closePayFastModal();
+      openNoteModal(currentPaySubject);
     }, 2000);
   });
 
-  pfCancel.addEventListener('click', () => {
-    payfastModal.classList.add('hidden');
-  });
-
-  // Unlock all button (demo)
-  unlockAllBtn.addEventListener('click', () => {
-    for (const key of Object.keys(NOTES)) {
-      unlockSubject(key);
-    }
-    renderSubjects();
-    alert('All subjects unlocked!');
-  });
-
-  // Download all notes as multiple txt files (one by one)
-  exportAllBtn.addEventListener('click', () => {
-    if (!confirm("This will download all notes as separate .txt files one by one. Continue?")) return;
-    for (const key of Object.keys(NOTES)) {
-      downloadSubject(key);
-    }
-  });
-
-  // Demo lock all shortcut (Shift+L)
-  document.addEventListener('keydown', e => {
-    if (e.shiftKey && e.key.toLowerCase() === 'l') {
-      if (confirm('Clear all unlocked notes?')) {
-        lockAll();
-        renderSubjects();
-        alert('All notes locked.');
+  // Unlock all button
+  document.getElementById('unlockAllBtn').addEventListener('click', () => {
+    // Confirm unlock all
+    if (confirm('Unlock ALL subjects for ' + formatPrice(Object.keys(NOTES).length * 6.99) + '? This simulates payment and unlocks all content locally.')) {
+      for (const key of Object.keys(NOTES)) {
+        unlockedSubjects.add(key);
       }
+      saveUnlocked();
+      refreshUI();
     }
   });
 
-  // Demo lock all button
+  // Download all notes as single zip or multiple files
+  // (for simplicity just trigger downloads one by one)
+  document.getElementById('exportAllBtn').addEventListener('click', () => {
+    for (const key of Object.keys(NOTES)) {
+      const note = NOTES[key];
+      const filename = `${note.title.replace(/\s+/g,'_').toLowerCase()}.txt`;
+      const blob = new Blob([note.content], {type: 'text/plain'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+    alert('All notes downloaded as separate .txt files.');
+  });
+
+  // Demo Lock button
   document.getElementById('demoLockBtn').addEventListener('click', () => {
-    if (confirm('Clear all unlocked notes?')) {
-      lockAll();
-      renderSubjects();
+    if (confirm('Lock all notes? This will clear your unlocks from local storage.')) {
+      unlockedSubjects.clear();
+      saveUnlocked();
+      refreshUI();
       alert('All notes locked.');
     }
   });
 
   // Demo info alert
   document.getElementById('demoInfoBtn').addEventListener('click', () => {
-    alert(`This website demo includes syllabus-aligned notes for CAIE subjects. Unlock notes by simulating a payment via the demo PayFast modal. All payment data stays local, no real payments.\n\nNotes updated: Aug 2025.`);
+    alert('This demo shows how paid notes unlock with a simulated payment. Unlock status is saved locally on your browser.');
   });
 
-  // Modal download and print buttons
-  modalDownload.addEventListener('click', () => {
-    const key = Object.keys(NOTES).find(k => NOTES[k].title === modalTitle.textContent);
-    if (key) downloadSubject(key);
+  // Keyboard shortcut Shift+L to lock all notes
+  window.addEventListener('keydown', e => {
+    if (e.shiftKey && (e.key === 'L' || e.key === 'l')) {
+      e.preventDefault();
+      document.getElementById('demoLockBtn').click();
+    }
+    if (e.key === 'Escape') {
+      closeNoteModal();
+      closePayFastModal();
+    }
   });
-  modalPrint.addEventListener('click', () => {
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`<pre style="font-family: ui-monospace, monospace; white-space: pre-wrap; padding: 1rem; color: #1e293b; background:#f3f4f6;">${modalContent.textContent}</pre>`);
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-  });
 
-  // Show current year
-  document.getElementById('year').textContent = new Date().getFullYear();
-
-  // Initial render
-  renderSubjects();
-
+  // Initialize
+  loadUnlocked();
+  refreshUI();
   </script>
 
 </body>
