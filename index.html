@@ -516,4 +516,20 @@ Exam Tips:
     // small UX: show a welcome modal once
     if (!localStorage.getItem('caie_seen_welcome_v1')) {
       alert('Welcome — this file contains original CAIE-style study notes. Purchases are simulated locally. Use Download to save notes as .txt.');
-      localStorage.setItem('caie_seen_welcome_v1', '1'_
+      localStorage.setItem('caie_seen_welcome_v1', '1');
+    }
+
+    // Accessibility: keyboard shortcut to lock all (shift+L)
+    window.addEventListener('keydown', (e) => {
+      if (e.shiftKey && e.key.toLowerCase() === 'l') {
+        if (confirm('Lock (clear) all unlocked subjects?')) {
+          lockAll();
+          renderGrid();
+          alert('All locked.');
+        }
+      }
+    });
+
+  </script>
+</body>
+</html>
