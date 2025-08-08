@@ -55,7 +55,6 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
-    /* Fix buttons container to not leave extra space */
     .btn-group {
       display: flex;
       gap: 8px;
@@ -360,13 +359,13 @@ Exam tips:
 - Nationalism, imperialism, alliances, triggers and long-term causes.
 
 2. 20th Century Themes
-- World Wars, interwar instability, rise of extremist regimes, Cold War overview.
+- World Wars, interwar instability, rise of dictatorships, Cold War basics.
 
-3. Decolonisation & Development
-- Processes of independence, economic and social change.
+3. Decolonization & Independence Movements
+- India, Africa, Middle East.
 
-Exam tips:
-- Use timelines, cause-effect chains, primary source analysis.`
+4. Social & Economic Changes
+- Technology, migration, cultural shifts, civil rights movements.`
     },
     "islamiyat": {
       title: "Islamiyat (Compulsory Subject for O-Level)",
@@ -569,7 +568,7 @@ Exam Tips:
     if (!key) return;
     const note = NOTES[key];
     const printWindow = window.open('', '', 'width=800,height=600');
-    printWindow.document.write(`<pre style="white-space: pre-wrap; font-family: monospace; font-size: 16px;">${note.content}</pre>`);
+    printWindow.document.write(`<pre style="white-space: pre-wrap; font-family: monospace; font-size: 16px; color:#000;">${note.content}</pre>`);
     printWindow.document.close();
     printWindow.focus();
     printWindow.print();
@@ -622,12 +621,11 @@ Exam Tips:
       refreshUI();
       closePayFastModal();
       openNoteModal(currentPaySubject);
-    }, 2000);
+    }, 1800);
   });
 
   // Unlock all button
   document.getElementById('unlockAllBtn').addEventListener('click', () => {
-    // Confirm unlock all
     if (confirm('Unlock ALL subjects for ' + formatPrice(Object.keys(NOTES).length * 6.99) + '? This simulates payment and unlocks all content locally.')) {
       for (const key of Object.keys(NOTES)) {
         unlockedSubjects.add(key);
@@ -637,8 +635,7 @@ Exam Tips:
     }
   });
 
-  // Download all notes as single zip or multiple files
-  // (for simplicity just trigger downloads one by one)
+  // Download all notes as separate .txt files
   document.getElementById('exportAllBtn').addEventListener('click', () => {
     for (const key of Object.keys(NOTES)) {
       const note = NOTES[key];
@@ -668,7 +665,7 @@ Exam Tips:
     alert('This demo shows how paid notes unlock with a simulated payment. Unlock status is saved locally on your browser.');
   });
 
-  // Keyboard shortcut Shift+L to lock all notes
+  // Keyboard shortcuts: Shift+L to lock all, Escape to close modals
   window.addEventListener('keydown', e => {
     if (e.shiftKey && (e.key === 'L' || e.key === 'l')) {
       e.preventDefault();
@@ -680,7 +677,7 @@ Exam Tips:
     }
   });
 
-  // Initialize
+  // Initialize UI
   loadUnlocked();
   refreshUI();
   </script>
