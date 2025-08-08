@@ -1,150 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Islamiyat Notes - Rain Forest Theme</title>
 <style>
-    body, html {
-        margin: 0;
-        padding: 0;
-        font-family: Arial, sans-serif;
-        color: white;
-        height: 100%;
-        overflow-x: hidden;
-    }
-    video#bgVideo {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        z-index: -2;
-    }
-    .overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5);
-        z-index: -1;
-    }
-    header {
-        background: rgba(0,0,0,0.6);
-        padding: 20px;
-        text-align: center;
-        font-size: 1.5rem;
-        font-weight: bold;
-        border-bottom: 2px solid #4cafef;
-    }
-    .container {
-        max-width: 800px;
-        margin: auto;
-        padding: 20px;
-    }
-    .card {
-        background: rgba(0,0,0,0.7);
-        margin-bottom: 10px;
-        border-radius: 8px;
-        overflow: hidden;
-        border: 1px solid #4cafef;
-    }
-    .card-header {
-        padding: 15px;
-        cursor: pointer;
-        font-weight: bold;
-        background: rgba(0,0,0,0.8);
-    }
-    .card-content {
-        display: none;
-        padding: 15px;
-        background: rgba(0,0,0,0.5);
-        font-size: 0.95rem;
-        line-height: 1.6;
-    }
-    .payfast-btn {
-        display: inline-block;
-        background: #4cafef;
-        padding: 10px 20px;
-        margin-top: 10px;
-        text-decoration: none;
-        color: white;
-        font-weight: bold;
-        border-radius: 5px;
-    }
-    .audio-toggle {
-        margin-top: 10px;
-        padding: 6px 12px;
-        background: #ff9800;
-        border: none;
-        color: white;
-        border-radius: 4px;
-        cursor: pointer;
-    }
+  body, html {
+    margin: 0; padding: 0;
+    font-family: Arial, sans-serif;
+    color: white;
+    height: 100%;
+    overflow-x: hidden;
+  }
+  video#bgVideo {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    z-index: -2;
+  }
+  .overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: -1;
+  }
+  header {
+    background: rgba(0,0,0,0.6);
+    padding: 20px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-bottom: 2px solid #4cafef;
+  }
+  .container {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+  }
+  .card {
+    background: rgba(0,0,0,0.7);
+    margin-bottom: 10px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #4cafef;
+  }
+  .card-header {
+    padding: 15px;
+    cursor: pointer;
+    font-weight: bold;
+    background: rgba(0,0,0,0.8);
+  }
+  .card-content {
+    display: none;
+    padding: 15px;
+    background: rgba(0,0,0,0.5);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+  .payfast-btn {
+    display: inline-block;
+    background: #4cafef;
+    padding: 10px 20px;
+    margin-top: 10px;
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    border-radius: 5px;
+  }
+  .audio-toggle {
+    margin-top: 10px;
+    padding: 6px 12px;
+    background: #ff9800;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+  }
 </style>
 </head>
 <body>
 
 <!-- Background Video -->
 <video id="bgVideo" autoplay muted loop playsinline>
-  <source src="https://cdn.pixabay.com/video/2019/08/16/26547-356497887_large.mp4" type="video/mp4">
+  <source src="https://cdn.pixabay.com/video/2019/08/16/26547-356497887_large.mp4" type="video/mp4" />
 </video>
 <div class="overlay"></div>
 
 <!-- Thunder Audio -->
 <audio id="thunderAudio" loop>
-    <source src="https://cdn.pixabay.com/download/audio/2023/03/14/audio_aee6e4f845.mp3?filename=thunderstorm-ambient-14538.mp3" type="audio/mpeg">
+  <source src="https://cdn.pixabay.com/download/audio/2023/03/14/audio_aee6e4f845.mp3?filename=thunderstorm-ambient-14538.mp3" type="audio/mpeg" />
 </audio>
 
 <!-- Header -->
 <header>
-    Islamiyat Notes - CIE
-    <br>
-    <a href="https://sandbox.payfast.co.za/eng/process?merchant_id=10000100&merchant_key=46f0cd694581a&amount=6.99&item_name=Premium%20Islamiyat%20Notes&return_url=https://example.com&cancel_url=https://example.com" 
-       class="payfast-btn" target="_blank">
-       PayFast Demo - $6.99
-    </a>
-    <button class="audio-toggle" onclick="toggleAudio()">Toggle Thunder</button>
+  Islamiyat Notes - CIE
+  <br />
+  <a href="https://sandbox.payfast.co.za/eng/process?merchant_id=10000100&merchant_key=46f0cd694581a&amount=6.99&item_name=Premium%20Islamiyat%20Notes&return_url=https://example.com&cancel_url=https://example.com" 
+    class="payfast-btn" target="_blank" rel="noopener noreferrer">PayFast Demo - $6.99</a>
+  <button class="audio-toggle" onclick="toggleAudio()">Toggle Thunder</button>
 </header>
 
 <!-- Notes Container -->
 <div class="container">
-    <div class="card">
-        <div class="card-header" onclick="toggleCard(this)">Chapter 1: Early Life of the Prophet (PBUH)</div>
-        <div class="card-content">
-            <p>The Prophet Muhammad (PBUH) was born in 570 CE in Makkah. His father, Abdullah, died before his birth, and his mother Amina passed away when he was six. He was raised by his grandfather Abdul Muttalib and later his uncle Abu Talib...</p>
-        </div>
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">Chapter 1: Early Life of the Prophet (PBUH)</div>
+    <div class="card-content">
+      <p>The Prophet Muhammad (PBUH) was born in 570 CE in Makkah. His father, Abdullah, died before his birth, and his mother Amina passed away when he was six. He was raised by his grandfather Abdul Muttalib and later his uncle Abu Talib...</p>
     </div>
-    <div class="card">
-        <div class="card-header" onclick="toggleCard(this)">Chapter 2: Prophethood and Revelation</div>
-        <div class="card-content">
-            <p>At the age of 40, Muhammad (PBUH) received his first revelation in the Cave of Hira through Angel Jibreel (Gabriel). This marked the beginning of his mission to spread Islam...</p>
-        </div>
+  </div>
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">Chapter 2: Prophethood and Revelation</div>
+    <div class="card-content">
+      <p>At the age of 40, Muhammad (PBUH) received his first revelation in the Cave of Hira through Angel Jibreel (Gabriel). This marked the beginning of his mission to spread Islam...</p>
     </div>
-    <div class="card">
-        <div class="card-header" onclick="toggleCard(this)">Chapter 3: Migration to Madinah</div>
-        <div class="card-content">
-            <p>The migration (Hijrah) to Madinah in 622 CE was a turning point in Islamic history. It led to the establishment of the first Muslim community and state...</p>
-        </div>
+  </div>
+  <div class="card">
+    <div class="card-header" onclick="toggleCard(this)">Chapter 3: Migration to Madinah</div>
+    <div class="card-content">
+      <p>The migration (Hijrah) to Madinah in 622 CE was a turning point in Islamic history. It led to the establishment of the first Muslim community and state...</p>
     </div>
+  </div>
 </div>
 
-<!-- JS -->
 <script>
-function toggleCard(header) {
+  function toggleCard(header) {
     const content = header.nextElementSibling;
     content.style.display = content.style.display === 'block' ? 'none' : 'block';
-}
-function toggleAudio() {
+  }
+  function toggleAudio() {
     const audio = document.getElementById('thunderAudio');
     if (audio.paused) {
-        audio.play();
+      audio.play();
     } else {
-        audio.pause();
+      audio.pause();
     }
-}
+  }
 </script>
 
 </body>
