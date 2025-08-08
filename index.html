@@ -42,6 +42,17 @@
     .grid-cols-responsive { grid-template-columns: repeat(1, minmax(0,1fr)); }
     @media(min-width: 640px) { .grid-cols-responsive { grid-template-columns: repeat(2, minmax(0,1fr)); } }
     @media(min-width: 1024px) { .grid-cols-responsive { grid-template-columns: repeat(3, minmax(0,1fr)); } }
+
+    /* Fixed button group layout */
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: flex-end;
+    }
+    .btn-group button {
+      min-width: 96px;
+    }
   </style>
 </head>
 <body class="min-h-screen text-slate-100">
@@ -102,9 +113,9 @@
         <div class="flex items-start justify-between gap-4">
           <h2 id="modalTitle" class="text-2xl font-bold text-sky-100"></h2>
           <div class="flex gap-2">
-            <button id="modalDownload" class="px-3 py-2 border rounded text-sky-100">Download</button>
-            <button id="modalPrint" class="px-3 py-2 border rounded text-sky-100">Print</button>
-            <button id="modalClose" class="px-3 py-2 bg-red-600 rounded text-white">Close</button>
+            <button id="modalDownload" class="px-3 py-2 border rounded text-sky-100 hover:bg-white/10 transition">Download</button>
+            <button id="modalPrint" class="px-3 py-2 border rounded text-sky-100 hover:bg-white/10 transition">Print</button>
+            <button id="modalClose" class="px-3 py-2 bg-red-600 rounded text-white hover:bg-red-700 transition">Close</button>
           </div>
         </div>
         <div class="mt-4 max-h-[60vh] overflow-auto note-content" id="modalContent" style="padding-right:12px;"></div>
@@ -371,25 +382,23 @@ Exam tips:
     div.className = 'p-4 rounded-xl glass card-hover transition transform';
     div.innerHTML = `
       <div class="flex items-start justify-between gap-3">
-        <div>
+        <div class="flex-1 pr-4">
           <h4 class="text-lg font-semibold text-sky-100">${data.title}</h4>
           <p class="text-sm text-slate-300 mt-2">${data.content.split('\\n')[0].slice(0,120)}...</p>
         </div>
-        <div class="text-right">
-          <div class="mb-2">
+        <div class="text-right btn-group">
+          <div>
             <span class="text-xs text-slate-300">Price</span>
             <div class="text-xl font-bold text-sky-200">$${data.price.toFixed(2)}</div>
           </div>
-          <div class="flex flex-col items-end gap-2">
-            ${unlocked ? `<button class="openBtn px-3 py-2 rounded-md border text-sky-100">Open</button>
-                          <button class="downloadBtn px-3 py-2 rounded-md border text-sky-100">Download</button>`
-                       : `<button class="unlockBtn px-3 py-2 rounded-md bg-indigo-600 text-white">Unlock</button>`}
-          </div>
+          ${unlocked
+            ? `<button class="openBtn px-3 py-2 rounded-md border text-sky-100 hover:bg-white/10 transition">Open</button>
+               <button class="downloadBtn px-3 py-2 rounded-md border text-sky-100 hover:bg-white/10 transition">Download</button>`
+            : `<button class="unlockBtn px-3 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition">Unlock</button>`}
         </div>
       </div>
     `;
-    // events
-    setTimeout(()=> {
+    setTimeout(() => {
       const unlockBtn = div.querySelector('.unlockBtn');
       const openBtn = div.querySelector('.openBtn');
       const downloadBtn = div.querySelector('.downloadBtn');
@@ -400,109 +409,118 @@ Exam tips:
     return div;
   }
 
-  function renderSubjects() {
+  function renderAllCards() {
     subjectsGrid.innerHTML = '';
-    for (const [k,d] of Object.entries(NOTES)) {
-      subjectsGrid.appendChild(createCard(k,d));
-    }
+    Object.entries(NOTES).forEach(([key, data]) => {
+      subjectsGrid.appendChild(createCard(key, data));
+    });
   }
 
   // ------------------------
-  // Modal & actions
+  // Modal open/close & content
   // ------------------------
+  let currentKey = null;
   function openModal(key) {
-    const data = NOTES[key];
-    modalTitle.textContent = data.title;
-    modalContent.textContent = data.content;
+    currentKey = key;
+    modalTitle.textContent = NOTES[key].title;
+    modalContent.textContent = NOTES[key].content;
     modal.classList.remove('hidden');
-    // download handler
-    modalDownload.onclick = () => downloadString(`${data.title}.txt`, `${data.title}\n\n${data.content}`);
-    modalPrint.onclick = () => {
-      const printWindow = window.open('', '_blank', 'width=800,height=600');
-      printWindow.document.write(`<pre style="white-space:pre-wrap;font-family:inherit;font-size:14px;">${escapeHtml(data.title + "\n\n" + data.content)}</pre>`);
-      printWindow.document.close();
-      printWindow.focus();
-      setTimeout(()=>printWindow.print(), 400);
-    }
+    modal.focus();
   }
-  function closeModal() { modal.classList.add('hidden'); }
+  function closeModal() {
+    modal.classList.add('hidden');
+    currentKey = null;
+  }
 
-  modalBackdrop.addEventListener('click', closeModal);
   modalClose.addEventListener('click', closeModal);
+  modalBackdrop.addEventListener('click', closeModal);
 
-  function handleUnlock(key) {
-    // Simulated purchase flow: show a gentle animated confirmation
-    const ok = confirm(`Simulated payment — unlock "${NOTES[key].title}" for $${NOTES[key].price.toFixed(2)}?`);
-    if (!ok) return;
-    unlock(key);
-    renderSubjects();
-    openModal(key);
-  }
-
-  // ------------------------
-  // Download helpers
-  // ------------------------
+  // Download text as .txt file
   function downloadSubject(key) {
-    const d = NOTES[key];
-    downloadString(`${d.title}.txt`, `${d.title}\n\n${d.content}`);
-  }
-
-  function downloadString(filename, text) {
-    const blob = new Blob([text], { type: 'text/plain' });
+    const data = NOTES[key];
+    const blob = new Blob([data.title + "\n\n" + data.content], {type: 'text/plain'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
+    a.download = `${key}_notes.txt`;
     a.click();
-    a.remove();
     URL.revokeObjectURL(url);
   }
 
-  // utility
-  function escapeHtml(s) {
-    return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-  }
+  modalDownload.addEventListener('click', () => {
+    if (currentKey) downloadSubject(currentKey);
+  });
+
+  modalPrint.addEventListener('click', () => {
+    if (!currentKey) return;
+    const printWindow = window.open('', '', 'width=800,height=600');
+    printWindow.document.write(`<pre style="font-family: monospace; white-space: pre-wrap; padding: 1em;">${NOTES[currentKey].title}\n\n${NOTES[currentKey].content}</pre>`);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+  });
 
   // ------------------------
-  // Top bar actions
+  // Unlock handlers & UI update
   // ------------------------
+  function handleUnlock(key) {
+    if (isUnlocked(key)) {
+      alert("Already unlocked!");
+      return;
+    }
+    if (confirm(`Unlock "${NOTES[key].title}" for $${NOTES[key].price.toFixed(2)}?`)) {
+      unlock(key);
+      alert('Unlocked! You can now open or download the notes.');
+      renderAllCards();
+    }
+  }
+
   document.getElementById('unlockAllBtn').addEventListener('click', () => {
-    if (confirm('Simulated unlock all notes for this browser?')) {
+    if (confirm("Unlock ALL subjects for $29.99?")) {
       unlockAll();
-      renderSubjects();
-      alert('All subjects unlocked (demo).');
+      alert("All subjects unlocked!");
+      renderAllCards();
     }
   });
 
   document.getElementById('exportAllBtn').addEventListener('click', () => {
-    let combined = '';
-    for (const d of Object.values(NOTES)) combined += `=== ${d.title} ===\n\n${d.content}\n\n\n`;
-    downloadString('CAIE_All_Notes.txt', combined);
+    if (!confirm("Download notes for ALL unlocked subjects?")) return;
+    const unlockedKeys = loadUnlocked();
+    if (unlockedKeys.length === 0) {
+      alert("No subjects unlocked yet.");
+      return;
+    }
+    unlockedKeys.forEach(k => downloadSubject(k));
   });
 
-  // demo lock button
+  // Demo buttons for locking and info
   document.getElementById('demoLockBtn').addEventListener('click', () => {
-    if (confirm('Clear unlocked state (lock all)?')) { lockAll(); renderSubjects(); alert('All locked.'); }
-  });
-
-  document.getElementById('demoInfoBtn').addEventListener('click', () => {
-    alert('These notes are original educational summaries (not official Cambridge materials). Use Download to save them.');
-  });
-
-  // keyboard shortcut shift+L to lock
-  window.addEventListener('keydown', (e) => {
-    if (e.shiftKey && e.key.toLowerCase() === 'l') {
-      if (confirm('Clear unlocked state (lock all)?')) { lockAll(); renderSubjects(); alert('All locked.'); }
+    if (confirm("Lock all unlocked subjects?")) {
+      lockAll();
+      alert("All subjects locked.");
+      renderAllCards();
     }
   });
 
-  // initialize
-  renderSubjects();
-  document.getElementById('year').textContent = new Date().getFullYear();
+  document.getElementById('demoInfoBtn').addEventListener('click', () => {
+    alert("This site offers CAIE study notes for key subjects. Unlock any subject to view full notes and download them for offline study.");
+  });
 
-  // accessibility: close modal with Escape
-  window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+  // Keyboard shortcut: Shift + L to lock all
+  window.addEventListener('keydown', (e) => {
+    if (e.shiftKey && (e.key === 'L' || e.key === 'l')) {
+      e.preventDefault();
+      if (confirm("Lock all unlocked subjects?")) {
+        lockAll();
+        alert("All subjects locked.");
+        renderAllCards();
+      }
+    }
+  });
+
+  // Initialize
+  renderAllCards();
+  document.getElementById('year').textContent = new Date().getFullYear();
 
   </script>
 </body>
