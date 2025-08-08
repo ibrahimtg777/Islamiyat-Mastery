@@ -55,6 +55,17 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+    /* Fix buttons container to not leave extra space */
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      flex-wrap: nowrap;
+      flex-shrink: 0;
+    }
+    .btn-group button {
+      min-width: 75px;
+    }
   </style>
 </head>
 <body class="min-h-screen text-slate-100">
@@ -107,7 +118,7 @@
       <div class="bg-gradient-to-r from-slate-900/80 to-slate-800/70 rounded-2xl p-6 glass shadow-2xl overflow-hidden">
         <div class="flex items-start justify-between gap-4">
           <h2 id="modalTitle" class="text-2xl font-bold text-sky-100"></h2>
-          <div class="flex gap-2">
+          <div class="btn-group">
             <button id="modalDownload" class="px-3 py-2 border rounded text-sky-100">Download</button>
             <button id="modalPrint" class="px-3 py-2 border rounded text-sky-100">Print</button>
             <button id="modalClose" class="px-3 py-2 bg-red-600 rounded text-white">Close</button>
@@ -126,10 +137,10 @@
         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/PayFast_Logo.svg/1280px-PayFast_Logo.svg.png" alt="PayFast" class="w-20">
         Demo Payment
       </h2>
-      <form id="payfastForm" class="flex flex-col gap-4">
+      <form id="payfastForm" class="flex flex-col gap-4" novalidate>
         <input type="text" id="pfName" placeholder="Full Name" class="p-3 rounded bg-slate-800 placeholder-slate-400" required autocomplete="name" />
         <input type="email" id="pfEmail" placeholder="Email Address" class="p-3 rounded bg-slate-800 placeholder-slate-400" required autocomplete="email" />
-        <input type="text" id="pfCard" placeholder="Card Number (fake)" class="p-3 rounded bg-slate-800 placeholder-slate-400" required pattern="\\d{13,19}" title="Enter 13 to 19 digits" autocomplete="cc-number" />
+        <input type="text" id="pfCard" placeholder="Card Number (13-19 digits)" class="p-3 rounded bg-slate-800 placeholder-slate-400" required pattern="\\d{13,19}" title="Enter 13 to 19 digits" autocomplete="cc-number" />
         <div class="flex gap-4">
           <input type="text" id="pfExpiry" placeholder="MM/YY" class="p-3 rounded bg-slate-800 placeholder-slate-400 flex-1" required pattern="(0[1-9]|1[0-2])\\/\\d{2}" title="Format MM/YY" autocomplete="cc-exp" />
           <input type="text" id="pfCVV" placeholder="CVV" class="p-3 rounded bg-slate-800 placeholder-slate-400 w-24" required pattern="\\d{3,4}" title="3 or 4 digits" autocomplete="cc-csc" />
@@ -199,11 +210,11 @@
     requestAnimationFrame(draw);
   })();
 
-  // Notes data
+  // Notes data with updated price $6.99
   const NOTES = {
     "mathematics": {
       title: "Mathematics (IGCSE / AS-A Level core concepts)",
-      price: 4.99,
+      price: 6.99,
       content:
 `Mathematics — Comprehensive Study Notes
 
@@ -235,7 +246,7 @@ Exam tips:
     },
     "physics": {
       title: "Physics (IGCSE / AS-A Level core concepts)",
-      price: 4.99,
+      price: 6.99,
       content:
 `Physics — Comprehensive Study Notes
 
@@ -260,7 +271,7 @@ Practical:
     },
     "chemistry": {
       title: "Chemistry (IGCSE / AS-A Level core concepts)",
-      price: 4.99,
+      price: 6.99,
       content:
 `Chemistry — Comprehensive Study Notes
 
@@ -284,7 +295,7 @@ Lab tips:
     },
     "biology": {
       title: "Biology (IGCSE / AS-A Level core concepts)",
-      price: 4.99,
+      price: 6.99,
       content:
 `Biology — Comprehensive Study Notes
 
@@ -305,7 +316,7 @@ Practical:
     },
     "english": {
       title: "English Language (IGCSE) — Reading & Writing Skills",
-      price: 4.99,
+      price: 6.99,
       content:
 `English Language — Comprehensive Study Notes
 
@@ -323,7 +334,7 @@ Exam tips:
     },
     "economics": {
       title: "Economics (IGCSE / AS Intro)",
-      price: 4.99,
+      price: 6.99,
       content:
 `Economics — Comprehensive Study Notes
 
@@ -341,7 +352,7 @@ Exam tips:
     },
     "history": {
       title: "History (Modern World themes)",
-      price: 4.99,
+      price: 6.99,
       content:
 `History — Comprehensive Study Notes
 
@@ -352,26 +363,36 @@ Exam tips:
 - World Wars, interwar instability, rise of extremist regimes, Cold War overview.
 
 3. Decolonisation & Development
-- Processes of independence, economic and social challenges.
+- Processes of independence, economic and social change.
 
 Exam tips:
-- Use specific examples and dates, practice source evaluation and cause-effect analysis.`
+- Use timelines, cause-effect chains, primary & secondary sources.`
     }
   };
 
-  // Storage keys and helpers
-  const STORAGE_KEY = 'caie_forest_unlocked_v1';
+  const STORAGE_KEY = 'caieNotesUnlocked';
+
+  // Save/load unlocked subjects locally
   function loadUnlocked() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
-    catch { return []; }
+    try {
+      const data = localStorage.getItem(STORAGE_KEY);
+      if (!data) return [];
+      return JSON.parse(data);
+    } catch {
+      return [];
+    }
   }
-  function saveUnlocked(arr) { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
-  function isUnlocked(key) { return loadUnlocked().includes(key); }
+  function saveUnlocked(arr) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+  }
+  function isUnlocked(key) {
+    return loadUnlocked().includes(key);
+  }
   function unlockSubject(key) {
-    const arr = loadUnlocked();
-    if (!arr.includes(key)) {
-      arr.push(key);
-      saveUnlocked(arr);
+    const unlocked = loadUnlocked();
+    if (!unlocked.includes(key)) {
+      unlocked.push(key);
+      saveUnlocked(unlocked);
     }
   }
   function lockAll() {
@@ -401,37 +422,31 @@ Exam tips:
   const pfPay = document.getElementById('pfPay');
   const pfSpinner = document.getElementById('pfSpinner');
 
-  // Current subject for payment
   let currentPaymentKey = null;
 
   // Create subject card
   function createCard(key, data) {
     const unlocked = isUnlocked(key);
     const div = document.createElement('div');
-    div.className = 'p-4 rounded-xl glass card-hover transition transform';
+    div.className = 'p-4 rounded-xl glass card-hover transition transform flex flex-col justify-between';
     div.innerHTML = `
-      <div class="flex items-start justify-between gap-3">
+      <div>
+        <h4 class="text-lg font-semibold text-sky-100">${data.title}</h4>
+        <p class="text-sm text-slate-300 mt-2">${data.content.split('\n')[0].slice(0,120)}...</p>
+      </div>
+      <div class="text-right mt-4 flex flex-col items-end gap-2 btn-group">
         <div>
-          <h4 class="text-lg font-semibold text-sky-100">${data.title}</h4>
-          <p class="text-sm text-slate-300 mt-2">${data.content.split('\n')[0].slice(0,120)}...</p>
+          <span class="text-xs text-slate-300">Price</span>
+          <div class="text-xl font-bold text-sky-200">$${data.price.toFixed(2)}</div>
         </div>
-        <div class="text-right">
-          <div class="mb-2">
-            <span class="text-xs text-slate-300">Price</span>
-            <div class="text-xl font-bold text-sky-200">$${data.price.toFixed(2)}</div>
-          </div>
-          <div class="flex flex-col items-end gap-2">
-            ${
-              unlocked
-                ? `<button class="openBtn px-3 py-2 rounded-md border text-sky-100">Open</button>
-                   <button class="downloadBtn px-3 py-2 rounded-md border text-sky-100">Download</button>`
-                : `<button class="unlockBtn px-3 py-2 rounded-md bg-indigo-600 text-white">Unlock</button>`
-            }
-          </div>
-        </div>
+        ${
+          unlocked
+            ? `<button class="openBtn px-3 py-2 rounded-md border text-sky-100">Open</button>
+               <button class="downloadBtn px-3 py-2 rounded-md border text-sky-100">Download</button>`
+            : `<button class="unlockBtn px-3 py-2 rounded-md bg-indigo-600 text-white">Unlock</button>`
+        }
       </div>
     `;
-    // Attach event listeners immediately:
     const unlockBtn = div.querySelector('.unlockBtn');
     const openBtn = div.querySelector('.openBtn');
     const downloadBtn = div.querySelector('.downloadBtn');
@@ -488,12 +503,17 @@ Exam tips:
   // Payment form submission (demo)
   payfastForm.addEventListener('submit', e => {
     e.preventDefault();
+
+    // Basic validation
+    if (!pfName.value.trim() || !pfEmail.value.trim() || !pfCard.value.match(/^\d{13,19}$/) || !pfExpiry.value.match(/^(0[1-9]|1[0-2])\/\d{2}$/) || !pfCVV.value.match(/^\d{3,4}$/)) {
+      alert("Please fill all fields correctly.");
+      return;
+    }
+
     pfPay.disabled = true;
     pfSpinner.classList.remove('hidden');
 
-    // Simple "processing" simulation 2s delay
     setTimeout(() => {
-      // Unlock subject
       unlockSubject(currentPaymentKey);
       renderSubjects();
       payfastModal.classList.add('hidden');
@@ -514,9 +534,9 @@ Exam tips:
     alert('All subjects unlocked!');
   });
 
-  // Download all notes as zipped txt files (simple zip download skipped here, downloads one by one)
+  // Download all notes as multiple txt files (one by one)
   exportAllBtn.addEventListener('click', () => {
-    if(!confirm("This will download all notes as separate .txt files, one by one. Continue?")) return;
+    if (!confirm("This will download all notes as separate .txt files one by one. Continue?")) return;
     for (const key of Object.keys(NOTES)) {
       downloadSubject(key);
     }
@@ -524,8 +544,8 @@ Exam tips:
 
   // Demo lock all shortcut (Shift+L)
   document.addEventListener('keydown', e => {
-    if(e.shiftKey && e.key.toLowerCase() === 'l') {
-      if(confirm('Clear all unlocked notes?')) {
+    if (e.shiftKey && e.key.toLowerCase() === 'l') {
+      if (confirm('Clear all unlocked notes?')) {
         lockAll();
         renderSubjects();
         alert('All notes locked.');
@@ -535,7 +555,7 @@ Exam tips:
 
   // Demo lock all button
   document.getElementById('demoLockBtn').addEventListener('click', () => {
-    if(confirm('Clear all unlocked notes?')) {
+    if (confirm('Clear all unlocked notes?')) {
       lockAll();
       renderSubjects();
       alert('All notes locked.');
@@ -549,13 +569,12 @@ Exam tips:
 
   // Modal download and print buttons
   modalDownload.addEventListener('click', () => {
-    // Use current modal title to find key
     const key = Object.keys(NOTES).find(k => NOTES[k].title === modalTitle.textContent);
-    if(key) downloadSubject(key);
+    if (key) downloadSubject(key);
   });
   modalPrint.addEventListener('click', () => {
     const printWindow = window.open('', '_blank');
-    printWindow.document.write(`<pre style="font-family: ui-monospace, monospace; white-space: pre-wrap; padding: 1rem;">${modalContent.textContent}</pre>`);
+    printWindow.document.write(`<pre style="font-family: ui-monospace, monospace; white-space: pre-wrap; padding: 1rem; color: #1e293b; background:#f3f4f6;">${modalContent.textContent}</pre>`);
     printWindow.document.close();
     printWindow.focus();
     printWindow.print();
@@ -568,5 +587,6 @@ Exam tips:
   renderSubjects();
 
   </script>
+
 </body>
 </html>
