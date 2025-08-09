@@ -1,52 +1,211 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>CAIE Notes — Forest Rain UI with Demo PayFast</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CAIE Detailed Notes — Unlock to Access</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    html,body { height: 100%; margin:0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #021014;
+      color: #e0e7ff;
+      overflow-x: hidden;
+    }
     #bg {
       position: fixed;
       inset: 0;
       background-image: url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1950&q=80');
       background-size: cover;
       background-position: center;
-      filter: saturate(0.9) contrast(0.9);
-      z-index: -3;
+      filter: saturate(0.9) contrast(0.85);
+      z-index: -10;
     }
     #overlay {
       position: fixed;
       inset: 0;
-      background: linear-gradient(180deg, rgba(6,21,38,0.45) 0%, rgba(2,6,23,0.6) 100%);
-      z-index: -2;
+      background: linear-gradient(180deg, rgba(6,21,38,0.45) 0%, rgba(2,6,23,0.7) 100%);
+      z-index: -9;
     }
     #rainCanvas {
       position: fixed;
       inset: 0;
-      z-index: -1;
+      z-index: -8;
       pointer-events: none;
       mix-blend-mode: screen;
       opacity: 0.85;
     }
+    /* Glass effect */
     .glass {
-      background: rgba(255,255,255,0.06);
-      backdrop-filter: blur(6px) saturate(1.1);
-      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255 255 255 / 0.07);
+      backdrop-filter: blur(6px) saturate(1.2);
+      border: 1px solid rgba(255 255 255 / 0.1);
     }
-    .card-hover:hover { transform: translateY(-6px); box-shadow: 0 12px 30px rgba(2,6,23,0.55); }
-    .note-content { white-space: pre-wrap; line-height: 1.6; color: #e6eef8; }
-    .grid-cols-responsive { grid-template-columns: repeat(1, minmax(0,1fr)); }
-    @media(min-width: 640px) { .grid-cols-responsive { grid-template-columns: repeat(2, minmax(0,1fr)); } }
-    @media(min-width: 1024px) { .grid-cols-responsive { grid-template-columns: repeat(3, minmax(0,1fr)); } }
+    .btn-primary {
+      background-color: #2563eb;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-weight: 600;
+      transition: background-color 0.3s;
+      user-select: none;
+    }
+    .btn-primary:hover {
+      background-color: #1d4ed8;
+    }
+    .btn-secondary {
+      background-color: transparent;
+      border: 1px solid #60a5fa;
+      color: #60a5fa;
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.375rem;
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .btn-secondary:hover {
+      background-color: #2563eb;
+      color: white;
+    }
+    /* Navigation styles */
+    #navSubjects, #navChapters {
+      max-width: 960px;
+      margin: 1rem auto;
+      padding: 1rem;
+      border-radius: 1rem;
+    }
+    .subject-card, .chapter-item {
+      cursor: pointer;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 0.75rem;
+      transition: background-color 0.25s;
+      border: 1px solid rgba(255 255 255 / 0.1);
+    }
+    .subject-card:hover, .chapter-item:hover {
+      background-color: rgba(37 99 235 / 0.3);
+    }
+    .locked {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+    /* Content */
+    #contentArea {
+      max-width: 900px;
+      margin: 1rem auto 3rem auto;
+      padding: 1.5rem 1rem;
+      background: rgba(0 0 0 / 0.4);
+      border-radius: 1rem;
+      overflow-y: auto;
+      max-height: 65vh;
+      line-height: 1.6;
+      user-select: text;
+    }
+    h1, h2, h3 {
+      color: #60a5fa;
+      margin-bottom: 0.75rem;
+    }
+    p {
+      margin-bottom: 1rem;
+    }
+    blockquote {
+      margin: 1rem 0;
+      padding-left: 1rem;
+      border-left: 4px solid #2563eb;
+      color: #a5b4fc;
+      font-style: italic;
+    }
+    code, pre {
+      background: rgba(255 255 255 / 0.1);
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.375rem;
+      font-family: monospace;
+      overflow-x: auto;
+    }
+    /* Scrollbar for content area */
+    #contentArea::-webkit-scrollbar {
+      width: 8px;
+    }
+    #contentArea::-webkit-scrollbar-thumb {
+      background: #2563eb;
+      border-radius: 10px;
+    }
+    /* Buttons container */
+    #buttonRow {
+      max-width: 900px;
+      margin: 0 auto 1rem auto;
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+    }
+    /* Modal */
+    #payfastModal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      padding: 1rem;
+    }
+    #payfastModal .modal-content {
+      background: #0e1726;
+      padding: 2rem;
+      border-radius: 1rem;
+      max-width: 400px;
+      width: 100%;
+      color: #cbd5e1;
+      box-shadow: 0 0 15px 3px #2563ebaa;
+    }
+    #payfastModal label {
+      display: block;
+      margin-bottom: 0.25rem;
+      font-weight: 600;
+      color: #60a5fa;
+    }
+    #payfastModal input {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 0.375rem;
+      border: none;
+      margin-bottom: 1rem;
+      background: #1e293b;
+      color: #e0e7ff;
+    }
+    #payfastModal button {
+      width: 100%;
+      padding: 0.6rem;
+      border-radius: 0.375rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      background-color: #2563eb;
+      color: white;
+      transition: background-color 0.3s;
+    }
+    #payfastModal button:hover {
+      background-color: #1d4ed8;
+    }
+    #payfastModal .close-btn {
+      margin-top: 0.5rem;
+      background: transparent;
+      color: #60a5fa;
+      font-weight: 500;
+    }
+    #payfastModal .close-btn:hover {
+      color: white;
+    }
     /* Spinner */
     .spinner {
-      border: 3px solid rgba(255,255,255,0.2);
+      border: 3px solid rgba(255,255,255,0.3);
       border-top-color: white;
       border-radius: 50%;
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
       animation: spin 1s linear infinite;
       display: inline-block;
       vertical-align: middle;
@@ -55,159 +214,121 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
-    /* Fix buttons container to not leave extra space */
-    .btn-group {
-      display: flex;
-      gap: 8px;
-      justify-content: flex-end;
-      flex-wrap: nowrap;
-      flex-shrink: 0;
-    }
-    .btn-group button {
-      min-width: 75px;
-    }
   </style>
 </head>
-<body class="min-h-screen text-slate-100">
+<body>
 
   <div id="bg" aria-hidden="true"></div>
   <div id="overlay" aria-hidden="true"></div>
   <canvas id="rainCanvas" aria-hidden="true"></canvas>
 
-  <div class="relative z-10 min-h-screen flex flex-col">
-    <header class="py-6">
-      <div class="max-w-6xl mx-auto px-4 flex items-center justify-between">
-        <div>
-          <h1 class="text-3xl font-extrabold tracking-tight drop-shadow-md">🌲 CAIE Notes — Forest Edition</h1>
-          <p class="text-slate-300 mt-1">Original, syllabus-aligned study notes. Unlock to read. (Payments simulated — stored locally.)</p>
-        </div>
-        <div class="flex items-center gap-3">
-          <button id="unlockAllBtn" class="px-3 py-2 rounded-md glass text-sky-200 hover:bg-white/5 transition">Unlock All</button>
-          <button id="exportAllBtn" class="px-3 py-2 rounded-md glass text-sky-200 hover:bg-white/5 transition">Download All</button>
-        </div>
-      </div>
-    </header>
+  <header class="max-w-5xl mx-auto pt-8 px-4">
+    <h1 class="text-4xl font-extrabold text-center text-sky-400 mb-6 select-none">🌲 CAIE Comprehensive Notes Portal</h1>
+    <p class="text-center text-slate-300 max-w-xl mx-auto mb-10 select-none">Unlock detailed, syllabus-aligned notes for all CAIE subjects. Browse subjects, select chapters, and read or download after unlocking.</p>
+  </header>
 
-    <main class="flex-1">
-      <div class="max-w-6xl mx-auto px-4 pb-12">
-        <section class="grid gap-6 grid-cols-responsive">
-          <div class="glass rounded-2xl p-6 flex flex-col gap-4">
-            <h2 class="text-xl font-semibold">How it works</h2>
-            <p class="text-slate-300">Click a subject card to preview. Click <strong>Unlock</strong> to simulate purchase — a PayFast-style demo payment will appear. Unlocks persist locally. Use <em>Download</em> to save notes as .txt files.</p>
-            <div class="flex gap-3">
-              <button id="demoLockBtn" class="px-4 py-2 bg-indigo-600 rounded-md shadow hover:brightness-105">Demo: Lock All (Shift+L)</button>
-              <button id="demoInfoBtn" class="px-4 py-2 border rounded-md">About Notes</button>
-            </div>
-          </div>
+  <main class="max-w-5xl mx-auto px-4">
+    <!-- Navigation: Subjects -->
+    <section id="navSubjects" class="glass p-6 mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Subjects</h2>
+      <div id="subjectsList"></div>
+    </section>
 
-          <div class="glass rounded-2xl p-6 col-span-1 lg:col-span-2">
-            <h3 class="text-lg font-semibold mb-4">Subjects</h3>
-            <div id="subjectsGrid" class="grid gap-4 grid-cols-responsive"></div>
-          </div>
-        </section>
+    <!-- Navigation: Chapters -->
+    <section id="navChapters" class="glass p-6 mb-8 hidden">
+      <button id="backToSubjects" class="btn-secondary mb-4">← Back to Subjects</button>
+      <h2 class="text-2xl font-semibold mb-4" id="chaptersTitle">Chapters</h2>
+      <div id="chaptersList"></div>
+    </section>
 
-        <div class="mt-8 text-slate-300 text-sm text-center">Tip: Press <strong>Shift + L</strong> to lock (clear) unlocked subjects. © <span id="year"></span></div>
-      </div>
-    </main>
-  </div>
+    <!-- Notes Content -->
+    <section id="notesSection" class="hidden">
+      <button id="backToChapters" class="btn-secondary mb-4">← Back to Chapters</button>
+      <h2 class="text-3xl font-bold mb-6" id="noteTitle"></h2>
+      <div id="contentArea" tabindex="0" role="region" aria-live="polite" aria-label="Notes content"></div>
+    </section>
 
-  <!-- Notes modal -->
-  <div id="modal" class="fixed inset-0 hidden items-center justify-center z-20">
-    <div class="absolute inset-0 bg-black/50" id="modalBackdrop"></div>
-    <div class="relative max-w-4xl w-full mx-4">
-      <div class="bg-gradient-to-r from-slate-900/80 to-slate-800/70 rounded-2xl p-6 glass shadow-2xl overflow-hidden">
-        <div class="flex items-start justify-between gap-4">
-          <h2 id="modalTitle" class="text-2xl font-bold text-sky-100"></h2>
-          <div class="btn-group">
-            <button id="modalDownload" class="px-3 py-2 border rounded text-sky-100">Download</button>
-            <button id="modalPrint" class="px-3 py-2 border rounded text-sky-100">Print</button>
-            <button id="modalClose" class="px-3 py-2 bg-red-600 rounded text-white">Close</button>
-          </div>
-        </div>
-        <div class="mt-4 max-h-[60vh] overflow-auto note-content" id="modalContent" style="padding-right:12px;"></div>
-      </div>
+    <!-- Buttons for download & unlock -->
+    <div id="buttonRow" class="hidden">
+      <button id="btnUnlock" class="btn-primary">Unlock Subject - $6.99</button>
+      <button id="btnDownload" class="btn-secondary hidden">Download Notes</button>
     </div>
-  </div>
+  </main>
 
-  <!-- Demo PayFast modal -->
-  <div id="payfastModal" class="fixed inset-0 hidden items-center justify-center z-30">
-    <div class="absolute inset-0 bg-black/70"></div>
-    <div class="relative max-w-md w-full mx-4 bg-gradient-to-r from-sky-900 to-indigo-900 rounded-3xl p-8 glass shadow-2xl text-slate-100">
-      <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/PayFast_Logo.svg/1280px-PayFast_Logo.svg.png" alt="PayFast" class="w-20">
-        Demo Payment
-      </h2>
-      <form id="payfastForm" class="flex flex-col gap-4" novalidate>
-        <input type="text" id="pfName" placeholder="Full Name" class="p-3 rounded bg-slate-800 placeholder-slate-400" required autocomplete="name" />
-        <input type="email" id="pfEmail" placeholder="Email Address" class="p-3 rounded bg-slate-800 placeholder-slate-400" required autocomplete="email" />
-        <input
-          type="tel"
-          id="pfCard"
-          placeholder="Card Number (13-19 digits)"
-          class="p-3 rounded bg-slate-800 placeholder-slate-400"
-          required
-          autocomplete="cc-number"
-        />
-        <div class="flex gap-4">
-          <input type="text" id="pfExpiry" placeholder="MM/YY" class="p-3 rounded bg-slate-800 placeholder-slate-400 flex-1" required pattern="(0[1-9]|1[0-2])\/\d{2}" title="Format MM/YY" autocomplete="cc-exp" />
-          <input type="text" id="pfCVV" placeholder="CVV" class="p-3 rounded bg-slate-800 placeholder-slate-400 w-24" required pattern="\d{3,4}" title="3 or 4 digits" autocomplete="cc-csc" />
+  <!-- PayFast Demo Modal -->
+  <div id="payfastModal" role="dialog" aria-modal="true" aria-labelledby="payfastTitle">
+    <div class="modal-content">
+      <h2 id="payfastTitle" class="text-2xl font-bold mb-4 text-sky-400">Demo PayFast Payment</h2>
+      <form id="payfastForm" novalidate>
+        <label for="pfName">Full Name</label>
+        <input type="text" id="pfName" name="pfName" placeholder="Your full name" autocomplete="name" required />
+        <label for="pfEmail">Email Address</label>
+        <input type="email" id="pfEmail" name="pfEmail" placeholder="you@example.com" autocomplete="email" required />
+        <label for="pfCard">Card Number (13-19 digits)</label>
+        <input type="text" id="pfCard" name="pfCard" placeholder="1234 5678 9012 3456" pattern="\\d{13,19}" title="Enter 13 to 19 digits" autocomplete="cc-number" required />
+        <div style="display:flex; gap: 1rem;">
+          <div style="flex:1;">
+            <label for="pfExpiry">Expiry (MM/YY)</label>
+            <input type="text" id="pfExpiry" name="pfExpiry" placeholder="MM/YY" pattern="(0[1-9]|1[0-2])\\/\\d{2}" title="Format MM/YY" autocomplete="cc-exp" required />
+          </div>
+          <div style="width:80px;">
+            <label for="pfCVV">CVV</label>
+            <input type="text" id="pfCVV" name="pfCVV" placeholder="123" pattern="\\d{3,4}" title="3 or 4 digits" autocomplete="cc-csc" required />
+          </div>
         </div>
-        <div class="flex items-center justify-between mt-6">
-          <button type="button" id="pfCancel" class="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600 transition">Cancel</button>
-          <button type="submit" id="pfPay" class="px-4 py-2 bg-green-600 rounded hover:bg-green-700 flex items-center justify-center transition">
-            Pay <span id="pfSpinner" class="spinner hidden"></span>
-          </button>
-        </div>
+        <button type="submit" id="pfPay" class="btn-primary mt-4 flex items-center justify-center">
+          Pay $6.99 <span id="pfSpinner" class="spinner hidden"></span>
+        </button>
       </form>
+      <button id="pfCancel" class="close-btn mt-3 w-full">Cancel</button>
     </div>
   </div>
 
   <script>
-  // Rain animation (canvas)
+  // Rain animation setup
   (function() {
     const canvas = document.getElementById('rainCanvas');
     const ctx = canvas.getContext('2d');
-    let w = canvas.width = innerWidth;
-    let h = canvas.height = innerHeight;
+    let w = canvas.width = window.innerWidth;
+    let h = canvas.height = window.innerHeight;
     const drops = [];
-    const DROP_COUNT = Math.floor((w * h) / 12000);
+    const DROP_COUNT = Math.floor((w * h) / 15000);
 
     function rand(min, max) { return Math.random() * (max - min) + min; }
     function reset() {
-      w = canvas.width = innerWidth;
-      h = canvas.height = innerHeight;
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
       drops.length = 0;
       for (let i = 0; i < DROP_COUNT; i++) {
         drops.push({
           x: Math.random() * w,
           y: Math.random() * h,
-          len: rand(10, 24),
-          velY: rand(300, 900) / 1000,
+          length: rand(10, 24),
+          velocityY: rand(300, 800) / 1000,
           thickness: rand(0.8, 1.8),
           sway: rand(-0.6, 0.6),
-          opacity: rand(0.12, 0.28)
+          opacity: rand(0.1, 0.25)
         });
       }
     }
     let last = performance.now();
     function draw(now) {
-      const dt = (now - last) / 1000; last = now;
-      ctx.clearRect(0,0,w,h);
-      const grad = ctx.createLinearGradient(0,0,0,h);
-      grad.addColorStop(0, 'rgba(255,255,255,0)');
-      grad.addColorStop(1, 'rgba(0,0,0,0.08)');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0,0,w,h);
+      const dt = (now - last) / 1000;
+      last = now;
+      ctx.clearRect(0, 0, w, h);
       ctx.lineCap = 'round';
       for (let d of drops) {
-        d.y += d.velY * 1200 * dt;
-        d.x += Math.sin((d.y + now * 0.001) * 0.002) * (d.sway * 2);
-        if (d.y > h + 30) { d.y = -20; d.x = Math.random() * w; }
+        d.y += d.velocityY * 1500 * dt;
+        d.x += Math.sin((d.y + now * 0.001) * 0.003) * (d.sway * 2);
+        if (d.y > h + 30) {
+          d.y = -20;
+          d.x = Math.random() * w;
+        }
         ctx.beginPath();
         ctx.strokeStyle = `rgba(200,230,255,${d.opacity})`;
         ctx.lineWidth = d.thickness;
         ctx.moveTo(d.x, d.y);
-        ctx.lineTo(d.x + d.sway * 8, d.y + d.len);
+        ctx.lineTo(d.x + d.sway * 8, d.y + d.length);
         ctx.stroke();
       }
       requestAnimationFrame(draw);
@@ -217,473 +338,606 @@
     requestAnimationFrame(draw);
   })();
 
-  // Notes data with updated price $6.99 including Islamiyat
-  const NOTES = {
-    "mathematics": {
-      title: "Mathematics (IGCSE / AS-A Level core concepts)",
+  // Data structure: Subjects -> Chapters -> Detailed Notes
+  const DATA = {
+    islamiyat: {
+      title: "Islamiyat",
       price: 6.99,
-      content:
-`Mathematics — Comprehensive Study Notes
+      chapters: [
+        {
+          title: "Chapter 1: The Life of the Prophet Muhammad (PBUH)",
+          content: `
+### Early Life
+The Prophet Muhammad (peace be upon him) was born in Makkah in 570 CE, known as the Year of the Elephant. Orphaned early, he was raised by his grandfather Abdul Muttalib and later by his uncle Abu Talib. He earned the titles Al-Amin (the trustworthy) and As-Sadiq (the truthful) for his honesty.
 
-1. Number System & Arithmetic
-- Real numbers: integers, rationals, irrationals, decimals and surds. Rationalize denominators; simplify surds using prime factorization.
-- Indices (exponents): product, quotient, negative and fractional indices. Use index rules to simplify algebraic expressions.
-- Standard form: a × 10^n with 1 ≤ a < 10; useful for significant figures.
+### First Revelation
+At age 40, during meditation in the Cave of Hira, the Angel Jibril appeared and revealed the first verses of the Qur'an (Surah Al-‘Alaq 96:1-5):
 
-2. Algebra
-- Simplifying expressions, factorisation, completing the square. Solve linear, quadratic and simultaneous equations. Inequalities and functions (domain, range).
+> *"Read in the name of your Lord who created — Created man from a clinging substance. Read, and your Lord is the most Generous — Who taught by the pen — Taught man that which he knew not."*
 
-3. Coordinate Geometry & Graphs
-- Lines (y = mx + c); circles and parabolas; transformations and sketching.
+### Opposition and Migration
+The message challenged the Quraysh's polytheistic beliefs and social order, causing persecution. After 13 years, the Prophet migrated (Hijrah) to Yathrib (later Madinah) in 622 CE, marking the Islamic calendar's start.
 
-4. Trigonometry
-- sin, cos, tan; radian measure; sine & cosine rules for general triangles.
+### Life in Madinah
+The Prophet established the Constitution of Madinah, uniting diverse tribes. Key battles include Badr, Uhud, and Khandaq. Treaty of Hudaybiyyah exemplified diplomacy.
 
-5. Calculus (AS/A-level)
-- Limits, differentiation (power, product, chain rules), integration, applications (area, kinematics).
+### Death and Legacy
+He passed away in 632 CE in Madinah, leaving a profound legacy that shaped Islamic civilization.
 
-6. Vectors & Geometry
-- Vector addition, scalar multiples, dot product, geometric proofs.
+### Important Hadith
+> *“The best among you are those who have the best manners and character.”* — Sahih Bukhari
+`
+        },
+        {
+          title: "Chapter 2: The Qur'an and Its Importance",
+          content: `
+### Revelation Process
+The Qur'an was revealed over 23 years in Arabic through Angel Jibril to the Prophet Muhammad (PBUH). It is divided into 114 chapters (Surahs).
 
-7. Probability & Statistics
-- Basic probability, permutations/combinations, mean/median/mode, variance & standard deviation.
+### Structure and Themes
+The Qur'an covers Tawheed (Oneness of God), Prophethood, the Hereafter, laws, and ethics.
 
-Exam tips:
-- Show full working. Use exact forms (fractions/surds) when asked. Practice past papers.`
+### Preservation
+The Qur'an was memorized and written down by companions. It remains unchanged and is recited worldwide.
+
+### Role in Life
+It guides daily worship, ethics, and social conduct.
+
+### Key Verses
+> *"Indeed, this Qur'an guides to that which is most suitable..."* (Surah Al-Isra 17:9)
+`
+        },
+        {
+          title: "Chapter 3: The Five Pillars of Islam",
+          content: `
+1. **Shahadah (Faith):** Declaration that there is no god but Allah and Muhammad is His messenger.
+
+2. **Salah (Prayer):** Five daily prayers facing the Kaaba.
+
+3. **Zakat (Charity):** Obligatory almsgiving to support the needy.
+
+4. **Sawm (Fasting):** Fasting during Ramadan from dawn to sunset.
+
+5. **Hajj (Pilgrimage):** Pilgrimage to Makkah at least once if able.
+
+Each pillar represents a foundation of Muslim faith and practice.
+`
+        },
+        {
+          title: "Chapter 4: The Six Articles of Faith (Iman)",
+          content: `
+1. **Belief in Allah:** The One true God, creator and sustainer.
+
+2. **Belief in Angels:** Created from light, they serve Allah.
+
+3. **Belief in Divine Books:** Qur'an, Torah, Psalms, Gospel as revealed scriptures.
+
+4. **Belief in Prophets:** Messengers including Adam, Noah, Moses, Jesus, and Muhammad (PBUH).
+
+5. **Belief in the Day of Judgment:** Accountability after death.
+
+6. **Belief in Qadar (Divine Decree):** Allah’s predestination.
+
+Faith in these underpins the Muslim worldview.
+`
+        },
+        {
+          title: "Chapter 5: Life After Death and the Day of Judgment",
+          content: `
+### Barzakh (The Intermediate Stage)
+After death, souls enter Barzakh, a barrier until resurrection.
+
+### Resurrection
+On the Last Day, all humans will be resurrected for judgment.
+
+### Accountability
+Deeds will be weighed; good rewarded with Jannah (Paradise), evil punished in Jahannam (Hellfire).
+
+### Descriptions of Paradise and Hell
+Paradise is described as gardens beneath which rivers flow, eternal bliss. Hellfire is severe torment for disbelievers and sinners.
+
+### Quranic Verse
+> *“And We will set up the scales of justice for the Day of Resurrection...”* (Surah Al-Anbiya 21:47)
+`
+        },
+        {
+          title: "Chapter 6: Prophethood and the Role of Prophets",
+          content: `
+Prophets are chosen by Allah to guide humanity. They bring divine messages and examples for righteous living.
+
+### Examples:
+- **Prophet Adam:** First human and prophet.
+- **Prophet Nuh (Noah):** Warned his people of the flood.
+- **Prophet Musa (Moses):** Led Israelites out of Egypt.
+- **Prophet Isa (Jesus):** Born miraculously, brought the Injil.
+- **Prophet Muhammad (PBUH):** Seal of the Prophets.
+
+### Characteristics of Prophets
+Truthful, patient, humble, trustworthy.
+
+### Hadith
+> *“There is no prophet between me and him, that is, Jesus.”* — Sahih Bukhari
+`
+        },
+        {
+          title: "Chapter 7: Islamic Ethics and Morality",
+          content: `
+### Core Ethical Principles
+- Justice ('Adl)
+- Mercy and Compassion
+- Truthfulness and Honesty
+- Respect and Kindness
+- Patience and Perseverance
+
+### Social Justice
+Emphasizes caring for orphans, the poor, and the oppressed.
+
+### Quranic Guidance
+> *“Indeed, Allah commands you to render trusts to whom they are due and when you judge between people to judge with justice.”* (Surah An-Nisa 4:58)
+
+### Hadith
+> *“The strong person is not the good wrestler, but the strong person is the one who controls himself when he is angry.”* — Sahih Bukhari
+`
+        },
+        {
+          title: "Chapter 8: Islamic History and Civilization",
+          content: `
+### Early Caliphates
+- Abu Bakr (R.A): Unified Arabia, fought apostasy wars.
+- Umar (R.A): Expanded Islamic state, established justice system.
+- Uthman (R.A): Commissioned the official Qur'an compilation.
+- Ali (R.A): Known for wisdom and courage.
+
+### Golden Age
+Advancements in science, medicine, philosophy, and arts during Abbasid period.
+
+### Contributions
+Muslim scholars preserved and expanded classical knowledge, influencing Renaissance Europe.
+
+### Legacy
+Islamic civilization spread values of knowledge, tolerance, and culture globally.
+`
+        }
+      ]
     },
-    "physics": {
-      title: "Physics (IGCSE / AS-A Level core concepts)",
+    mathematics: {
+      title: "Mathematics",
       price: 6.99,
-      content:
-`Physics — Comprehensive Study Notes
+      chapters: [
+        {
+          title: "Chapter 1: Algebra",
+          content: `
+### Introduction to Algebra
+Algebra deals with symbols and the rules for manipulating those symbols. It allows us to solve equations and understand patterns.
 
-1. Mechanics
-- Kinematics: displacement, velocity, acceleration. SUVAT equations for constant acceleration.
-- Forces & Newton's laws: F = ma, free-body diagrams, equilibrium.
+### Key Concepts:
+- Variables: Letters that represent numbers.
+- Expressions: Combinations of numbers and variables.
+- Equations: Statements that two expressions are equal.
 
-2. Energy & Momentum
-- Work, energy, power: KE = 1/2 mv^2, PE = mgh. Conservation of energy and momentum.
+### Example:
+Solve for x: 2x + 5 = 15  
+Subtract 5 from both sides: 2x = 10  
+Divide both sides by 2: x = 5
+`
+        },
+        {
+          title: "Chapter 2: Geometry",
+          content: `
+### Basic Geometry
+Study of shapes, sizes, relative positions, and properties of space.
 
-3. Waves & Optics
-- Wave properties, refraction (Snell's law), lens formula 1/f = 1/u + 1/v.
+### Important Terms:
+- Points, Lines, Angles
+- Triangles: Types (equilateral, isosceles, scalene)
+- Circles: Radius, diameter, circumference
 
-4. Electricity & Magnetism
-- Current, voltage, resistance (Ohm's law). Circuits, EM induction (Faraday's law).
+### Example:
+Area of a triangle = 1/2 × base × height
+`
+        },
+        {
+          title: "Chapter 3: Trigonometry",
+          content: `
+### Basics of Trigonometry
+Deals with relationships between the sides and angles of triangles.
 
-5. Thermal Physics & Modern Physics
-- Specific heat, latent heat, photoelectric effect basics.
+### Important Ratios:
+- Sine (sin)
+- Cosine (cos)
+- Tangent (tan)
 
-Practical:
-- Use units, show calculations, handle uncertainties.`
+### Example:
+sin(θ) = opposite / hypotenuse
+`
+        },
+        {
+          title: "Chapter 4: Calculus",
+          content: `
+### Introduction to Calculus
+Focuses on rates of change (differentiation) and accumulation of quantities (integration).
+
+### Derivatives
+Measures the rate at which a function changes.
+
+### Integrals
+Measures the area under a curve.
+
+### Example:
+If f(x) = x², then f'(x) = 2x
+`
+        }
+      ]
     },
-    "chemistry": {
-      title: "Chemistry (IGCSE / AS-A Level core concepts)",
+    physics: {
+      title: "Physics",
       price: 6.99,
-      content:
-`Chemistry — Comprehensive Study Notes
+      chapters: [
+        {
+          title: "Chapter 1: Mechanics",
+          content: `
+### Motion and Forces
+Study of how objects move and interact.
 
-1. Atomic Structure & Periodic Table
-- Atoms, isotopes, electron configurations and periodic trends.
+### Newton’s Laws
+1. An object remains at rest or in uniform motion unless acted upon.
+2. F = ma (Force equals mass times acceleration)
+3. For every action, there is an equal and opposite reaction.
 
-2. Bonding & Structure
-- Ionic, covalent, metallic bonding; intermolecular forces.
+### Example:
+Calculate force: A 5 kg object accelerates at 2 m/s²  
+F = 5 × 2 = 10 N
+`
+        },
+        {
+          title: "Chapter 2: Waves and Optics",
+          content: `
+### Waves
+Transfer of energy through oscillations.
 
-3. Quantitative Chemistry
-- Mole concept, stoichiometry, titration calculations, concentration (mol/L).
+### Types:
+- Transverse waves
+- Longitudinal waves
 
-4. Energetics & Equilibrium
-- Exothermic/endothermic, Hess' law, Le Chatelier's principle, rate laws.
+### Optics
+Study of light behavior, reflection, refraction.
 
-5. Organic Basics
-- Functional groups, isomerism, common reaction types (addition, substitution, oxidation).
+### Example:
+Snell’s Law: n₁ sin θ₁ = n₂ sin θ₂
+`
+        },
+        {
+          title: "Chapter 3: Electricity and Magnetism",
+          content: `
+### Electricity
+Study of electric charges and currents.
 
-Lab tips:
-- Familiarise with titration technique and safe handling.`
+### Magnetism
+Study of magnetic fields and forces.
+
+### Important Formulas:
+Ohm’s Law: V = IR  
+Magnetic force: F = qvB sin θ
+`
+        }
+      ]
     },
-    "biology": {
-      title: "Biology (IGCSE / AS-A Level core concepts)",
+    chemistry: {
+      title: "Chemistry",
       price: 6.99,
-      content:
-`Biology — Comprehensive Study Notes
+      chapters: [
+        {
+          title: "Chapter 1: Atomic Structure",
+          content: `
+### Atoms
+Basic unit of matter, composed of protons, neutrons, and electrons.
 
-1. Cell Biology
-- Structure of prokaryotic and eukaryotic cells; membrane transport (diffusion, osmosis, active transport).
+### Atomic Number and Mass
+Atomic number = number of protons  
+Mass number = protons + neutrons
 
-2. Genetics
-- DNA, transcription, translation, meiosis & mitosis, inheritance patterns.
+### Example:
+Carbon has 6 protons and typically 6 neutrons.
+`
+        },
+        {
+          title: "Chapter 2: Chemical Bonding",
+          content: `
+### Types of Bonds
+- Ionic: Transfer of electrons
+- Covalent: Sharing of electrons
 
-3. Human & Plant Physiology
-- Circulatory, respiratory, digestive systems; photosynthesis and plant transport.
+### Properties
+Bond strength, polarity, and molecular geometry.
 
-4. Ecology & Evolution
-- Food webs, energy flow, natural selection, speciation.
+### Example:
+Water (H₂O) has polar covalent bonds.
+`
+        },
+        {
+          title: "Chapter 3: Stoichiometry",
+          content: `
+### Calculations in Chemistry
+Relates quantities of reactants and products.
 
-Practical:
-- Emphasise experimental design, control variables and repeatability.`
+### Example:
+Balanced equation: 2H₂ + O₂ → 2H₂O  
+Calculate mass of water formed from given hydrogen.
+`
+        }
+      ]
     },
-    "english": {
-      title: "English Language (IGCSE) — Reading & Writing Skills",
+    english: {
+      title: "English",
       price: 6.99,
-      content:
-`English Language — Comprehensive Study Notes
+      chapters: [
+        {
+          title: "Chapter 1: Grammar Essentials",
+          content: `
+### Parts of Speech
+- Nouns, pronouns, verbs, adjectives, adverbs
 
-1. Reading
-- Identify main idea, tone, purpose, register. Analyse language features (imagery, rhetorical devices).
+### Sentence Structure
+- Subject + predicate
+- Types of sentences: declarative, interrogative, imperative, exclamatory
 
-2. Writing
-- Plan structure, paragraph development, tone adaptation. Persuasive techniques and descriptive detail.
+### Example:
+She (subject) runs (verb) fast (adverb).
+`
+        },
+        {
+          title: "Chapter 2: Comprehension and Analysis",
+          content: `
+### Reading Comprehension
+Understanding main ideas, themes, and vocabulary.
 
-3. Grammar
-- Sentence structures, punctuation rules, avoiding common errors.
+### Literary Devices
+- Metaphor, simile, personification, irony
 
-Exam tips:
-- Annotate passages, use relevant quotes and explain their effect.`
-    },
-    "economics": {
-      title: "Economics (IGCSE / AS Intro)",
-      price: 6.99,
-      content:
-`Economics — Comprehensive Study Notes
+### Example:
+“The wind whispered through the trees” is personification.
+`
+        },
+        {
+          title: "Chapter 3: Essay Writing",
+          content: `
+### Structure of Essays
+- Introduction
+- Body paragraphs
+- Conclusion
 
-1. Basic Economic Problem
-- Scarcity, choices, opportunity cost, PPF concept.
+### Tips
+Use clear topic sentences, supporting evidence, and cohesive transitions.
 
-2. Demand & Supply
-- Determinants, elasticity (PED/PES), movements vs shifts.
-
-3. Macroeconomics
-- AD components, inflation, unemployment, fiscal & monetary policy.
-
-4. Market Failure & Trade
-- Externalities, public goods, comparative advantage.`
-    },
-    "history": {
-      title: "History (Modern World themes)",
-      price: 6.99,
-      content:
-`History — Comprehensive Study Notes
-
-1. Causes of Conflict
-- Nationalism, imperialism, alliances, triggers and long-term causes.
-
-2. 20th Century Themes
-- World Wars, interwar instability, rise of extremist regimes, Cold War overview.
-
-3. Decolonisation & Development
-- Processes of independence, economic and social change.
-
-Exam tips:
-- Use timelines, cause-effect chains, primary & secondary sources.`
-    },
-    "islamiyat": {
-      title: "Islamiyat (CAIE IGCSE) — Detailed Notes",
-      price: 6.99,
-      content:
-`Islamiyat — Detailed Study Notes
-
-Chapter 1: The Life of Prophet Muhammad (PBUH)
-- Early life, prophethood, Meccan period, migration (Hijrah), Madinan period.
-- Major events: Battles of Badr, Uhud, Khandaq; Treaty of Hudaybiyyah.
-- Characteristics and moral teachings of the Prophet.
-
-Chapter 2: The Quran and Hadith
-- Revelation process, compilation of Quran.
-- Importance and classification of Hadith.
-- Major collections and scholars.
-
-Chapter 3: Pillars of Islam
-- Shahada: Declaration of faith.
-- Salah: Five daily prayers (times, conditions).
-- Sawm: Fasting during Ramadan, rules and significance.
-- Zakat: Obligatory charity, calculation basics.
-- Hajj: Pilgrimage rituals and conditions.
-
-Chapter 4: Beliefs and Faith (Aqidah)
-- Articles of faith: belief in Allah, angels, prophets, books, Day of Judgment, Qadar (predestination).
-- Tawheed (Oneness of God) explained.
-- Importance of Iman and its effects on life.
-
-Chapter 5: Moral and Social Teachings
-- Honesty, justice, kindness, respect for parents and elders.
-- Rights of neighbors, orphans, and society.
-- Prohibition of major sins.
-
-Chapter 6: Islamic History and the Rightly Guided Caliphs
-- Abu Bakr, Umar, Uthman, Ali: their contributions and challenges.
-- Expansion of Islam and establishment of justice.
-- Compilation of Quran during their rule.
-
-Chapter 7: Contemporary Issues in Islam
-- Islam and human rights.
-- Role of Muslims in modern society.
-- Importance of education and knowledge.
-
-Chapter 8: Islamic Practices and Celebrations
-- Eid-ul-Fitr, Eid-ul-Adha, significance and practices.
-- Friday prayers and mosque importance.
-- Daily Islamic etiquettes and supplications.
-
-Exam Tips:
-- Use Quranic verses and authentic Hadith.
-- Explain concepts clearly with examples.
-- Revise the life events chronologically.`
+### Example:
+An essay on “The Importance of Education”
+`
+        }
+      ]
     }
   };
 
-  // State
-  let unlockedSubjects = new Set(JSON.parse(localStorage.getItem('unlockedSubjects') || '[]'));
-  let currentSubject = null;
+  // State management for unlocked subjects
+  const unlockedSubjects = new Set(JSON.parse(localStorage.getItem('unlockedSubjects') || '[]'));
+  let currentSubjectKey = null;
+  let currentChapterIndex = null;
 
-  // Elements
-  const subjectsGrid = document.getElementById('subjectsGrid');
-  const modal = document.getElementById('modal');
-  const modalTitle = document.getElementById('modalTitle');
-  const modalContent = document.getElementById('modalContent');
-  const modalClose = document.getElementById('modalClose');
-  const modalDownload = document.getElementById('modalDownload');
-  const modalPrint = document.getElementById('modalPrint');
-  const unlockAllBtn = document.getElementById('unlockAllBtn');
-  const exportAllBtn = document.getElementById('exportAllBtn');
-  const demoLockBtn = document.getElementById('demoLockBtn');
-  const demoInfoBtn = document.getElementById('demoInfoBtn');
+  // Elements refs
+  const subjectsList = document.getElementById('subjectsList');
+  const navChapters = document.getElementById('navChapters');
+  const chaptersList = document.getElementById('chaptersList');
+  const chaptersTitle = document.getElementById('chaptersTitle');
+  const navSubjects = document.getElementById('navSubjects');
+  const notesSection = document.getElementById('notesSection');
+  const noteTitle = document.getElementById('noteTitle');
+  const contentArea = document.getElementById('contentArea');
+  const backToSubjectsBtn = document.getElementById('backToSubjects');
+  const backToChaptersBtn = document.getElementById('backToChapters');
+  const buttonRow = document.getElementById('buttonRow');
+  const btnUnlock = document.getElementById('btnUnlock');
+  const btnDownload = document.getElementById('btnDownload');
 
   // PayFast modal elements
   const payfastModal = document.getElementById('payfastModal');
   const payfastForm = document.getElementById('payfastForm');
-  const pfName = document.getElementById('pfName');
-  const pfEmail = document.getElementById('pfEmail');
-  const pfCard = document.getElementById('pfCard');
-  const pfExpiry = document.getElementById('pfExpiry');
-  const pfCVV = document.getElementById('pfCVV');
-  const pfCancel = document.getElementById('pfCancel');
   const pfPay = document.getElementById('pfPay');
   const pfSpinner = document.getElementById('pfSpinner');
+  const pfCancel = document.getElementById('pfCancel');
 
-  // Render subjects grid
+  // Utility: sanitize text to HTML (simple)
+  function markdownToHTML(md) {
+    let html = md
+      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+      .replace(/^\> (.*$)/gim, '<blockquote>$1</blockquote>')
+      .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/gim, '<em>$1</em>')
+      .replace(/\n$/gim, '<br />')
+      ;
+    return html;
+  }
+
+  // Render subjects
   function renderSubjects() {
-    subjectsGrid.innerHTML = '';
-    Object.entries(NOTES).forEach(([key, subj]) => {
-      const unlocked = unlockedSubjects.has(key);
+    navSubjects.classList.remove('hidden');
+    navChapters.classList.add('hidden');
+    notesSection.classList.add('hidden');
+    buttonRow.classList.add('hidden');
+    subjectsList.innerHTML = '';
+    for (const key in DATA) {
+      const subj = DATA[key];
       const card = document.createElement('div');
-      card.className = `glass p-6 rounded-2xl flex flex-col justify-between cursor-pointer transition-transform card-hover select-none`;
-      card.tabIndex = 0;
+      card.className = 'subject-card flex justify-between items-center';
       card.setAttribute('role', 'button');
-      card.setAttribute('aria-pressed', unlocked ? 'true' : 'false');
-      card.dataset.subjectKey = key;
+      card.setAttribute('tabindex', 0);
+      card.setAttribute('aria-pressed', 'false');
+      card.dataset.key = key;
 
-      const priceText = unlocked ? 'Unlocked' : `$${subj.price.toFixed(2)}`;
+      const titleDiv = document.createElement('div');
+      titleDiv.innerHTML = `<h3 class="text-xl font-semibold">${subj.title}</h3>`;
 
-      card.innerHTML = `
-        <h3 class="text-xl font-semibold mb-2">${subj.title}</h3>
-        <p class="text-slate-400 mb-4">${unlocked ? 'Click to view notes' : 'Premium content'}</p>
-        <div class="text-right text-sm font-semibold ${unlocked ? 'text-green-400' : 'text-sky-400'}">${priceText}</div>
-      `;
+      const priceOrStatus = document.createElement('div');
+      priceOrStatus.className = 'text-sky-400 font-semibold select-none';
 
-      card.onclick = () => openSubject(key);
-      card.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openSubject(key); } };
-      subjectsGrid.appendChild(card);
+      if (unlockedSubjects.has(key)) {
+        priceOrStatus.textContent = 'Unlocked';
+        card.classList.remove('locked');
+      } else {
+        priceOrStatus.textContent = `$${subj.price.toFixed(2)}`;
+        card.classList.add('locked');
+      }
+
+      card.appendChild(titleDiv);
+      card.appendChild(priceOrStatus);
+
+      card.addEventListener('click', () => {
+        if (!unlockedSubjects.has(key)) {
+          // Show unlock modal for subject
+          currentSubjectKey = key;
+          openPayfastModal(subj.price);
+          return;
+        }
+        showChapters(key);
+      });
+      card.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          card.click();
+        }
+      });
+      subjectsList.appendChild(card);
+    }
+  }
+
+  // Show chapters for a subject
+  function showChapters(subjectKey) {
+    currentSubjectKey = subjectKey;
+    const subj = DATA[subjectKey];
+    navSubjects.classList.add('hidden');
+    navChapters.classList.remove('hidden');
+    notesSection.classList.add('hidden');
+    buttonRow.classList.add('hidden');
+    chaptersTitle.textContent = `${subj.title} - Chapters`;
+    chaptersList.innerHTML = '';
+    subj.chapters.forEach((chap, i) => {
+      const item = document.createElement('div');
+      item.className = 'chapter-item';
+      item.setAttribute('role', 'button');
+      item.setAttribute('tabindex', 0);
+      item.dataset.index = i;
+      item.textContent = chap.title;
+      item.addEventListener('click', () => {
+        showNote(subjectKey, i);
+      });
+      item.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          item.click();
+        }
+      });
+      chaptersList.appendChild(item);
     });
   }
 
-  // Open subject modal: if unlocked show content else show payfast modal
-  function openSubject(key) {
-    currentSubject = key;
-    if (unlockedSubjects.has(key)) {
-      showModal(key);
-    } else {
-      showPayfast(key);
-    }
+  // Show note content
+  function showNote(subjectKey, chapterIndex) {
+    currentChapterIndex = chapterIndex;
+    const subj = DATA[subjectKey];
+    const chapter = subj.chapters[chapterIndex];
+    navSubjects.classList.add('hidden');
+    navChapters.classList.add('hidden');
+    notesSection.classList.remove('hidden');
+    buttonRow.classList.remove('hidden');
+
+    noteTitle.textContent = chapter.title;
+    contentArea.innerHTML = markdownToHTML(chapter.content);
+    btnDownload.classList.add('hidden');
+    btnUnlock.classList.add('hidden');
   }
 
-  // Show notes modal
-  function showModal(key) {
-    const subj = NOTES[key];
-    modalTitle.textContent = subj.title;
-    modalContent.textContent = subj.content;
-    modal.classList.remove('hidden');
-    modal.focus();
-  }
+  // Back buttons
+  backToSubjectsBtn.addEventListener('click', () => {
+    renderSubjects();
+  });
+  backToChaptersBtn.addEventListener('click', () => {
+    showChapters(currentSubjectKey);
+  });
 
-  // Close notes modal
-  modalClose.onclick = () => {
-    modal.classList.add('hidden');
-  };
-  modalClose.onkeydown = e => {
-    if(e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      modal.classList.add('hidden');
-    }
-  };
-
-  // Download current note
-  modalDownload.onclick = () => {
-    if (!currentSubject) return;
-    const subj = NOTES[currentSubject];
-    const blob = new Blob([subj.content], {type:'text/plain'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `${subj.title.replace(/\s+/g,'_')}.txt`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-  };
-
-  // Print current note
-  modalPrint.onclick = () => {
-    if (!currentSubject) return;
-    const subj = NOTES[currentSubject];
-    const printWindow = window.open('', '', 'width=800,height=600');
-    printWindow.document.write('<pre style="white-space: pre-wrap; font-family: Arial, sans-serif; font-size:14px;">' + subj.content + '</pre>');
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-  };
-
-  // Unlock all
-  unlockAllBtn.onclick = () => {
-    if(confirm('Unlock all subjects for $' + NOTES["mathematics"].price.toFixed(2) + ' each? This simulates payment for all.')) {
-      Object.keys(NOTES).forEach(k => unlockedSubjects.add(k));
-      saveUnlocks();
-      renderSubjects();
-      alert('All subjects unlocked! You can now view any notes.');
-    }
-  };
-
-  // Export all unlocked notes as .zip (simple fallback: download txts one by one)
-  exportAllBtn.onclick = () => {
-    if(unlockedSubjects.size === 0) {
-      alert('No subjects unlocked yet!');
-      return;
-    }
-    // Because no zip lib, download one by one with delay
-    const unlockedArray = Array.from(unlockedSubjects);
-    let idx = 0;
-    alert('Downloading all unlocked notes one by one. Please allow pop-ups.');
-
-    function downloadNext() {
-      if(idx >= unlockedArray.length) return;
-      const key = unlockedArray[idx++];
-      const subj = NOTES[key];
-      const blob = new Blob([subj.content], {type:'text/plain'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `${subj.title.replace(/\s+/g,'_')}.txt`;
-      a.click();
-      URL.revokeObjectURL(a.href);
-      setTimeout(downloadNext, 1000);
-    }
-    downloadNext();
-  };
-
-  // Save unlock state
-  function saveUnlocks() {
-    localStorage.setItem('unlockedSubjects', JSON.stringify(Array.from(unlockedSubjects)));
-  }
-
-  // Demo Lock All (clear unlocks)
-  demoLockBtn.onclick = () => {
-    if(confirm('Lock all notes? This will clear your unlocks locally.')) {
-      unlockedSubjects.clear();
-      saveUnlocks();
-      renderSubjects();
-      alert('All subjects locked.');
-    }
-  };
-
-  // Demo Info
-  demoInfoBtn.onclick = () => {
-    alert(
-`This demo simulates unlocking premium notes with a mock PayFast payment modal.
-Payment data is NOT sent anywhere.
-Unlocks persist locally in your browser storage.
-You can download notes as .txt files.
-Enjoy studying!`
-    );
-  };
-
-  // Keyboard shortcut Shift+L to lock all
-  window.addEventListener('keydown', (e) => {
-    if(e.shiftKey && e.key.toLowerCase() === 'l') {
-      demoLockBtn.click();
+  // Unlock button logic
+  btnUnlock.addEventListener('click', () => {
+    if (currentSubjectKey) {
+      openPayfastModal(DATA[currentSubjectKey].price);
     }
   });
 
-  // PAYFAST DEMO LOGIC
+  // Download notes (simple text download)
+  btnDownload.addEventListener('click', () => {
+    if (!currentSubjectKey || currentChapterIndex === null) return;
+    const subj = DATA[currentSubjectKey];
+    const chapter = subj.chapters[currentChapterIndex];
+    const filename = `${subj.title} - ${chapter.title}.txt`;
+    const blob = new Blob([chapter.content], {type: 'text/plain'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
 
-  // Open payfast modal for given subject
-  function showPayfast(subjectKey) {
-    currentSubject = subjectKey;
-    payfastModal.classList.remove('hidden');
+  // PayFast modal open
+  function openPayfastModal(amount) {
+    payfastModal.style.display = 'flex';
+    pfPay.disabled = false;
+    pfSpinner.classList.add('hidden');
     payfastForm.reset();
-    pfName.focus();
+    pfPay.textContent = `Pay $${amount.toFixed(2)}`;
+    pfPay.appendChild(pfSpinner);
+    pfPay.setAttribute('aria-busy', 'false');
   }
 
-  // Close payfast modal
-  pfCancel.onclick = () => {
-    payfastModal.classList.add('hidden');
-  };
-
-  // Validate PayFast form card number: accepts digits, spaces, dashes; validates length 13-19 digits
-  function validateCardNumber(num) {
-    const cleaned = num.replace(/\D/g, '');
-    return cleaned.length >= 13 && cleaned.length <= 19;
+  // PayFast modal close
+  function closePayfastModal() {
+    payfastModal.style.display = 'none';
   }
 
-  // Form submit handler
-  payfastForm.onsubmit = (e) => {
+  pfCancel.addEventListener('click', e => {
     e.preventDefault();
+    closePayfastModal();
+  });
 
-    // Simple validations
-    if(pfName.value.trim().length < 3) {
-      alert('Please enter your full name.');
-      pfName.focus();
+  // Payment form submission (demo validation)
+  payfastForm.addEventListener('submit', e => {
+    e.preventDefault();
+    // Basic validation
+    const card = payfastForm.pfCard.value.replace(/\s/g,'');
+    if (!/^\d{13,19}$/.test(card)) {
+      alert("Card number must be 13 to 19 digits.");
       return;
     }
-    if(!/\S+@\S+\.\S+/.test(pfEmail.value.trim())) {
-      alert('Please enter a valid email address.');
-      pfEmail.focus();
-      return;
-    }
-    if(!validateCardNumber(pfCard.value.trim())) {
-      alert('Card number must contain 13 to 19 digits.');
-      pfCard.focus();
-      return;
-    }
-    if(!/^(0[1-9]|1[0-2])\/\d{2}$/.test(pfExpiry.value.trim())) {
-      alert('Expiry must be in MM/YY format.');
-      pfExpiry.focus();
-      return;
-    }
-    if(!/^\d{3,4}$/.test(pfCVV.value.trim())) {
-      alert('CVV must be 3 or 4 digits.');
-      pfCVV.focus();
+    if (!payfastForm.checkValidity()) {
+      alert("Please fill out all fields correctly.");
       return;
     }
 
-    // Show spinner and disable inputs
-    pfSpinner.classList.remove('hidden');
     pfPay.disabled = true;
-    pfCancel.disabled = true;
+    pfSpinner.classList.remove('hidden');
+    pfPay.setAttribute('aria-busy', 'true');
 
-    // Simulate delay for payment
+    // Simulate payment delay
     setTimeout(() => {
-      // Unlock the current subject
-      unlockedSubjects.add(currentSubject);
-      saveUnlocks();
+      // On success:
+      unlockedSubjects.add(currentSubjectKey);
+      localStorage.setItem('unlockedSubjects', JSON.stringify([...unlockedSubjects]));
+      alert("Payment successful! Subject unlocked.");
+      closePayfastModal();
       renderSubjects();
-      payfastModal.classList.add('hidden');
-      pfSpinner.classList.add('hidden');
-      pfPay.disabled = false;
-      pfCancel.disabled = false;
-      alert(`Payment successful! "${NOTES[currentSubject].title}" is now unlocked.`);
-      showModal(currentSubject);
-    }, 1600);
-  };
+    }, 2000);
+  });
 
-  // Initialization
-  document.getElementById('year').textContent = new Date().getFullYear();
+  // On page load:
   renderSubjects();
 
   </script>
-
 </body>
 </html>
